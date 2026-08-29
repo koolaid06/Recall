@@ -14,7 +14,7 @@ export default function Timeline({ events, activeSeconds, onSelect }) {
               style={{ left: `${Math.max(left, 2)}%` }}
               onClick={() => onSelect(event)}
             >
-              <span className="point-dot" />
+              <span className="point-mark" />
               <span className="point-time">{event.time}</span>
               <span className="point-title">{event.title}</span>
             </button>

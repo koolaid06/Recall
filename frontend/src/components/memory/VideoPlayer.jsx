@@ -34,10 +34,10 @@ export default function VideoPlayer({ activeSeconds = 0, onTimeChange }) {
         <div className="video-time">{formatTime(activeSeconds)}</div>
       </div>
       <div className="video-overlay">
-        <button className="play-button" onClick={toggle}>{playing ? "Ⅱ" : "▶"}</button>
+        <button className="play-button" onClick={toggle} aria-label={playing ? "Pause" : "Play"}>{playing ? "Ⅱ" : "▶"}</button>
         <div className="video-progress"><span style={{ width: `${Math.min((activeSeconds / 2901) * 100, 100)}%` }} /></div>
-        <button className="time-button" onClick={() => seek(-10)}>−10</button>
-        <button className="time-button" onClick={() => seek(10)}>+10</button>
+        <button className="time-button" onClick={() => seek(-10)} aria-label="Back 10 seconds">−10</button>
+        <button className="time-button" onClick={() => seek(10)} aria-label="Forward 10 seconds">+10</button>
         <span className="duration">48:21</span>
       </div>
     </div>

@@ -1829,7 +1829,7 @@ footer > :last-child {
   overflow: hidden;
 
   border: 1px solid rgba(17, 4, 46, 0.08);
-  border-radius: 22px;
+  border-radius: 3px;
 
   background: #0b0329;
 
@@ -1907,7 +1907,7 @@ footer > :last-child {
   width: 7px;
   height: 7px;
 
-  border-radius: 50%;
+  border-radius: 0;
 
   background: var(--cyan);
 
@@ -1964,7 +1964,7 @@ footer > :last-child {
 
   border: 0;
 
-  border-radius: 50%;
+  border-radius: 3px;
 
   background: #fff;
 
@@ -2011,7 +2011,7 @@ footer > :last-child {
   min-height: 100%;
 
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
+  border-radius: 3px;
 
   background: linear-gradient(180deg, rgba(16, 9, 37, 0.96) 0%, rgba(11, 5, 30, 0.98) 100%);
 
@@ -2043,7 +2043,7 @@ footer > :last-child {
 
   border: 1px solid rgba(113, 105, 255, 0.28);
 
-  border-radius: 999px;
+  border-radius: 2px;
 
   background: rgba(113, 105, 255, 0.12);
 
@@ -2068,7 +2068,7 @@ footer > :last-child {
 
   border: 1px solid rgba(255, 255, 255, 0.08);
 
-  border-radius: 12px;
+  border-radius: 3px;
 
   outline: none;
 
@@ -2101,7 +2101,7 @@ footer > :last-child {
 .ask-form button {
   border: 0;
 
-  border-radius: 12px;
+  border-radius: 3px;
 
   background: linear-gradient(135deg, #17dcff 0%, #7169ff 100%);
 
@@ -2242,7 +2242,7 @@ footer > :last-child {
 
   border: 1px solid rgba(255, 255, 255, 0.07);
 
-  border-radius: 18px;
+  border-radius: 3px;
 
   background: linear-gradient(180deg, rgba(15, 9, 33, 0.96) 0%, rgba(10, 5, 27, 0.98) 100%);
 
@@ -2288,7 +2288,7 @@ footer > :last-child {
   color: #b3abc6;
 }
 
-.point-dot {
+.point-mark {
   display: block;
 
   width: 8px;
@@ -2298,7 +2298,7 @@ footer > :last-child {
 
   border: 2px solid rgba(10, 5, 27, 0.9);
 
-  border-radius: 50%;
+  border-radius: 0;
 
   background: #9078ff;
 
@@ -2310,7 +2310,7 @@ footer > :last-child {
     box-shadow 0.25s ease;
 }
 
-.timeline-point--active .point-dot {
+.timeline-point--active .point-mark {
   background: #7fe6ff;
 
   box-shadow:
@@ -2410,7 +2410,7 @@ footer > :last-child {
 
   border: 1px solid rgba(255, 255, 255, 0.08);
 
-  border-radius: 18px;
+  border-radius: 3px;
 
   background: linear-gradient(180deg, rgba(15, 9, 33, 0.96) 0%, rgba(10, 5, 27, 0.98) 100%);
 

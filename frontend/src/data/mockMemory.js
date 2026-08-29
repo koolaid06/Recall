@@ -7,9 +7,9 @@ export const memory = {
 
   events: [
     { time: "01:12", seconds: 72, title: "Firebase proposed", type: "Idea", detail: "The original backend direction was introduced." },
-    { time: "01:37", seconds: 97, title: "Integration issue", type: "Problem", detail: "The team identified a problem with the current architecture." },
-    { time: "02:04", seconds: 124, title: "Decision changed", type: "Decision", detail: "Supabase was selected as the new direction." },
-    { time: "04:18", seconds: 258, title: "Authentication discussed", type: "Discussion", detail: "The team compared authentication approaches." },
+    // { time: "01:37", seconds: 97, title: "Integration issue", type: "Problem", detail: "The team identified a problem with the current architecture." },
+    // { time: "02:04", seconds: 124, title: "Decision changed", type: "Decision", detail: "Supabase was selected as the new direction." },
+    // { time: "04:18", seconds: 258, title: "Authentication discussed", type: "Discussion", detail: "The team compared authentication approaches." },
     { time: "18:42", seconds: 1122, title: "Deployment strategy", type: "Unresolved", detail: "No final deployment approach was agreed upon." },
     { time: "31:08", seconds: 1868, title: "Provider lock-in", type: "Unresolved", detail: "The team flagged a concern for a future discussion." }
   ],
