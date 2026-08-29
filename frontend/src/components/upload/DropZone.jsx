@@ -31,7 +31,7 @@ export default function DropZone({ file, onFile }) {
       <div className="drop-subtitle">
         {file ? `${(file.size / 1024 / 1024).toFixed(1)} MB · Ready to process` : "or click to browse your files"}
       </div>
-      {!file && <div className="file-types">MP4 · MOV · MP3 · WAV · M4A</div>}
+      {!file && <div className="file-types">MP4 · MOV</div>}
     </div>
   );
 }
