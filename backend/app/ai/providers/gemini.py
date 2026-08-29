@@ -9,6 +9,9 @@ from app.ai.base import AIProvider
 
 load_dotenv()
 
+# Standard production Flash model (1,500 requests/day on Free Tier)
+MODEL_NAME = "gemini-3.6-flash"
+
 PROMPT = """
 You are RECALL, an episodic memory extraction system.
 
@@ -36,7 +39,7 @@ class GeminiProvider(AIProvider):
         # 1. Upload media file to Gemini Files API
         uploaded_file = self.client.files.upload(file=file_path)
 
-        # 2. Wait for audio/video file processing to complete (Non-blocking async wait)
+        # 2. Wait for audio/video processing to complete
         while uploaded_file.state.name == "PROCESSING":
             await asyncio.sleep(2)
             uploaded_file = self.client.files.get(name=uploaded_file.name)
@@ -48,7 +51,7 @@ class GeminiProvider(AIProvider):
 
         # 3. Generate structured content matching CompleteExtractionPayload schema
         response = self.client.models.generate_content(
-            model="gemini-3.6-flash",
+            model=MODEL_NAME,
             contents=[uploaded_file, PROMPT],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -64,7 +67,7 @@ class GeminiProvider(AIProvider):
 
     async def answer_question(self, question: str, context) -> str:
         response = self.client.models.generate_content(
-            model="gemini-3.6-flash",
+            model=MODEL_NAME,
             contents=[
                 f"""
                 Answer the question using ONLY the provided context.
