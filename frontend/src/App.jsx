@@ -61,8 +61,8 @@ function App() {
 
         <nav className={`nav-links ${menuOpen ? "nav-links--open" : ""}`}>
           <a href="#overview" onClick={() => setMenuOpen(false)}>Overview</a>
-          <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="#story" onClick={() => setMenuOpen(false)}>How it works</a>
+          <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
           <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
         </nav>
 
@@ -89,11 +89,6 @@ function App() {
           <div className="hero-noise" />
 
           <div className="hero-content">
-            <div className="eyebrow reveal">
-              <span className="eyebrow-dot" />
-              MULTIMODAL EPISODIC MEMORY
-            </div>
-
             <h1 className="hero-title reveal reveal-delay-1">
               <span>RECALL</span><i>.</i>
             </h1>
@@ -118,16 +113,6 @@ function App() {
               >
                 Explore RECALL
               </button>
-            </div>
-
-            <div className="hero-proof reveal reveal-delay-5">
-              <span>VIDEO</span>
-              <b />
-              <span>AUDIO</span>
-              <b />
-              <span>CONTEXT</span>
-              <b />
-              <span>EVIDENCE</span>
             </div>
           </div>
 
