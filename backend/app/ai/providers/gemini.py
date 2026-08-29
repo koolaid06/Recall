@@ -50,7 +50,7 @@ class GeminiProvider(AIProvider):
 
         # 3. Generate structured content matching CompleteExtractionPayload schema
         response = self.client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=[uploaded_file, PROMPT],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -66,7 +66,7 @@ class GeminiProvider(AIProvider):
 
     async def answer_question(self, question: str, context) -> str:
         response = self.client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=[
                 f"""
                 Answer the question using ONLY the provided context.
