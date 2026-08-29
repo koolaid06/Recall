@@ -143,3 +143,37 @@ async def upload_file(file: UploadFile = File(...)):
     finally:
         if os.path.exists(file_path):
             os.remove(file_path)
+@router.get("/recordings/{recording_id}")
+
+async def get_recording(recording_id: str):
+
+    recording = (
+        supabase
+        .table("recordings")
+        .select("*")
+        .eq("id", recording_id)
+        .execute()
+    )
+
+    memory = (
+        supabase
+        .table("memories")
+        .select("*")
+        .eq("recording_id", recording_id)
+        .execute()
+    )
+
+    transcripts = (
+        supabase
+        .table("transcripts")
+        .select("*")
+        .eq("recording_id", recording_id)
+        .order("start_time")
+        .execute()
+    )
+
+    return {
+        "recording": recording.data[0] if recording.data else None,
+        "memory": memory.data[0] if memory.data else None,
+        "transcripts": transcripts.data
+    }

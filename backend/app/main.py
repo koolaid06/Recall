@@ -32,7 +32,7 @@ async def health_check():
         "status": "healthy" if overall_healthy else "degraded",
         "services": {
             "database": db_status,
-            "storage_directory": storage_status,
+            "temporary_upload_directory": storage_status,
             "gemini_api_configured": gemini_key_present
         }
     }
@@ -41,13 +41,6 @@ async def health_check():
 def home():
     return {"message": "RECALL backend is running!"}
 
-@app.get("/test-db")
-def test_db():
-    response = supabase.table("recordings").select("*").execute()
 
-    return {
-        "status": "ok",
-        "data": response.data
-    }
 app.include_router(query_router)
 app.include_router(recordings_router)
