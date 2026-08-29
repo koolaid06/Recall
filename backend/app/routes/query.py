@@ -13,7 +13,7 @@ router = APIRouter()
 
 class AskRequest(BaseModel):
     question: str
-    recording_id: Optional[str] = None
+    recording_id: str
 
 
 @router.post("/ask")
