@@ -140,3 +140,6 @@ async def upload_file(file: UploadFile = File(...)):
         ).execute()
 
         raise
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
