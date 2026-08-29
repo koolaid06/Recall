@@ -1,5 +1,5 @@
+import asyncio
 import os
-import time
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -29,24 +29,22 @@ Do not invent information. If an element is absent, return an empty list or appr
 class GeminiProvider(AIProvider):
 
     def __init__(self):
-        self.client = genai.Client(
-            api_key=os.getenv("GEMINI_API_KEY")
-        )
+        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-    async def analyze_media(
-        self, file_path: str
-    ) -> CompleteExtractionPayload:
+    async def analyze_media(self, file_path: str) -> CompleteExtractionPayload:
 
         # 1. Upload media file to Gemini Files API
         uploaded_file = self.client.files.upload(file=file_path)
 
-        # 2. Wait for audio/video file processing to complete
+        # 2. Wait for audio/video file processing to complete (Non-blocking async wait)
         while uploaded_file.state.name == "PROCESSING":
-            time.sleep(2)
+            await asyncio.sleep(2)
             uploaded_file = self.client.files.get(name=uploaded_file.name)
 
         if uploaded_file.state.name == "FAILED":
-            raise RuntimeError("Gemini media file processing failed on the server.")
+            raise RuntimeError(
+                "Gemini media file processing failed on the server."
+            )
 
         # 3. Generate structured content matching CompleteExtractionPayload schema
         response = self.client.models.generate_content(

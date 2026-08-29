@@ -1,17 +1,15 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
 import os
 import shutil
-import subprocess
 import uuid
+from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile, status
 
-from app.database.supabase import supabase
 from app.ai.factory import get_ai_provider
+from app.database.supabase import supabase
+from app.services.media_service import get_duration, preprocess_media
 from app.services.memory_service import save_extraction
 
 router = APIRouter()
 
-
-# Absolute uploads folder
 UPLOAD_DIR = os.path.abspath("uploads")
 
 ALLOWED_TYPES = {
@@ -25,147 +23,122 @@ ALLOWED_TYPES = {
 }
 
 
-def get_duration(file_path: str):
+async def process_recording_task(recording_id: str, raw_file_path: str, mime_type: str):
+    """Background task handler for non-blocking media preprocessing and AI extraction."""
+    processed_file_path = raw_file_path
+
     try:
-        result = subprocess.run(
-            [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                file_path,
-            ],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
+        # 1. Run media preprocessing asynchronously
+        processed_file_path = await preprocess_media(raw_file_path, mime_type)
 
-        return float(result.stdout.strip())
+        # 2. Extract media duration
+        duration = await get_duration(raw_file_path)
 
-    except Exception:
-        return None
+        # 3. Analyze processed media with AI provider
+        ai_provider = get_ai_provider()
+        ai_result = await ai_provider.analyze_media(processed_file_path)
+
+        # 4. Save extracted memories and transcript entries
+        await save_extraction(recording_id, ai_result)
+
+        # 5. Mark recording as completed in Supabase
+        supabase.table("recordings").update(
+            {
+                "duration_seconds": duration,
+                "status": "completed",
+                "error_message": None,
+            }
+        ).eq("id", recording_id).execute()
+
+    except Exception as e:
+        # Update database with failure reason
+        supabase.table("recordings").update(
+            {"status": "failed", "error_message": str(e)}
+        ).eq("id", recording_id).execute()
+
+    finally:
+        # Clean up temporary staging files from disk
+        for path in set([raw_file_path, processed_file_path]):
+            if path and os.path.exists(path):
+                os.remove(path)
 
 
-@router.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-
-    # 1. Validate file type
+@router.post("/upload", status_code=status.HTTP_202_ACCEPTED)
+async def upload_file(
+    background_tasks: BackgroundTasks, file: UploadFile = File(...)
+):
+    # 1. Validate file format
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(
-            status_code=400,
-            detail="Unsupported file type"
+            status_code=400, detail="Unsupported file type"
         )
 
-    # 2. Make uploads directory
+    # 2. Ensure upload folder exists
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-    # 3. Give file a unique stored name
+    # 3. Save payload to local temporary file
     extension = os.path.splitext(file.filename)[1]
-
     stored_filename = f"{uuid.uuid4()}{extension}"
+    raw_file_path = os.path.join(UPLOAD_DIR, stored_filename)
 
-    file_path = os.path.join(
-        UPLOAD_DIR,
-        stored_filename
-    )
-
-    # 4. Save actual file locally
-    with open(file_path, "wb") as buffer:
+    with open(raw_file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # 5. Read metadata
-    file_size = os.path.getsize(file_path)
-    duration = get_duration(file_path)
+    file_size = os.path.getsize(raw_file_path)
 
-    # 6. Create recording in Supabase
+    # 4. Create record in Supabase with 'processing' status
     db_response = (
-        supabase
-        .table("recordings")
-        .insert({
-            "filename": file.filename,
-            "file_size_bytes": file_size,
-            "mime_type": file.content_type,
-            "duration_seconds": duration,
-            "status": "processing"
-        })
+        supabase.table("recordings")
+        .insert(
+            {
+                "filename": file.filename,
+                "file_size_bytes": file_size,
+                "mime_type": file.content_type,
+                "status": "processing",
+            }
+        )
         .execute()
     )
 
     recording = db_response.data[0]
     recording_id = recording["id"]
 
-    try:
-        # 7. Get the configured AI provider
-        ai_provider = get_ai_provider()
+    # 5. Schedule heavy background processing
+    background_tasks.add_task(
+        process_recording_task,
+        recording_id=recording_id,
+        raw_file_path=raw_file_path,
+        mime_type=file.content_type,
+    )
 
-        # 8. Process the recording with the AI provider
-        ai_result = await ai_provider.analyze_media(file_path)
+    # 6. Return response immediately (HTTP 202)
+    return {
+        "recording_id": recording_id,
+        "filename": file.filename,
+        "status": "processing",
+        "message": "File upload received. Processing started in background.",
+    }
 
-        # 9. Save extracted memories and transcript
-        await save_extraction(
-            recording_id,
-            ai_result
-        )
 
-        # 10. Mark recording as completed
-        supabase.table("recordings").update({
-            "status": "completed",
-            "error_message": None
-        }).eq(
-            "id",
-            recording_id
-        ).execute()
-
-        # 11. Return result
-        return {
-            "recording_id": recording_id,
-            "filename": file.filename,
-            "duration_seconds": duration,
-            "status": "completed",
-            "ai_result": ai_result
-        }
-
-    except Exception as e:
-
-        # 12. Record failure
-        supabase.table("recordings").update({
-            "status": "failed",
-            "error_message": str(e)
-        }).eq(
-            "id",
-            recording_id
-        ).execute()
-
-        raise
-    finally:
-        if os.path.exists(file_path):
-            os.remove(file_path)
 @router.get("/recordings/{recording_id}")
-
 async def get_recording(recording_id: str):
 
     recording = (
-        supabase
-        .table("recordings")
+        supabase.table("recordings")
         .select("*")
         .eq("id", recording_id)
         .execute()
     )
 
     memory = (
-        supabase
-        .table("memories")
+        supabase.table("memories")
         .select("*")
         .eq("recording_id", recording_id)
         .execute()
     )
 
     transcripts = (
-        supabase
-        .table("transcripts")
+        supabase.table("transcripts")
         .select("*")
         .eq("recording_id", recording_id)
         .order("start_time")
@@ -175,5 +148,5 @@ async def get_recording(recording_id: str):
     return {
         "recording": recording.data[0] if recording.data else None,
         "memory": memory.data[0] if memory.data else None,
-        "transcripts": transcripts.data
+        "transcripts": transcripts.data,
     }
