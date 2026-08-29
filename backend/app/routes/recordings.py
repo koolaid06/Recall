@@ -5,7 +5,7 @@ import subprocess
 import uuid
 
 from app.database.supabase import supabase
-from app.ai.providers.gemini import analyze_media
+from app.ai.factory import get_ai_provider
 from app.services.memory_service import save_extraction
 
 router = APIRouter()
@@ -98,17 +98,19 @@ async def upload_file(file: UploadFile = File(...)):
     recording_id = recording["id"]
 
     try:
+        # 7. Get the configured AI provider
+        ai_provider = get_ai_provider()
 
-        # 7. Hand file to processing layer
-        ai_result = await analyze_media(file_path)
+        # 8. Process the recording with the AI provider
+        ai_result = await ai_provider.analyze_media(file_path)
 
-        # 8. Save memories + transcript chunks
+        # 9. Save extracted memories and transcript
         await save_extraction(
             recording_id,
             ai_result
         )
 
-        # 9. Mark complete
+        # 10. Mark recording as completed
         supabase.table("recordings").update({
             "status": "completed",
             "error_message": None
@@ -117,6 +119,7 @@ async def upload_file(file: UploadFile = File(...)):
             recording_id
         ).execute()
 
+        # 11. Return result
         return {
             "recording_id": recording_id,
             "filename": file.filename,
@@ -127,7 +130,7 @@ async def upload_file(file: UploadFile = File(...)):
 
     except Exception as e:
 
-        # 10. Record failure
+        # 12. Record failure
         supabase.table("recordings").update({
             "status": "failed",
             "error_message": str(e)
