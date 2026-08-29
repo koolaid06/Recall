@@ -1,37 +1,6 @@
-`md
 # RECALL
 
 RECALL is a multimodal memory system that processes uploaded video/audio into structured memories, transcript chunks, and searchable evidence.
-
-## Project Structure
-
-text
-Recall/
-├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── config.py
-│   │   ├── schemas.py
-│   │   ├── routes/
-│   │   │   ├── recordings.py
-│   │   │   └── query.py
-│   │   ├── services/
-│   │   │   ├── memory_service.py
-│   │   │   └── retrieval_service.py
-│   │   ├── ai/
-│   │   │   ├── factory.py
-│   │   │   └── providers/
-│   │   │       ├── gemini.py
-│   │   │       └── reka.py
-│   │   └── database/
-│   │       └── supabase.py
-│   ├── uploads/
-│   ├── requirements.txt
-│   └── .env
-├── frontend/
-├── .gitignore
-└── README.md
-`
 
 ## Backend Flow
 
