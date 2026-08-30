@@ -150,3 +150,41 @@ async def get_recording(recording_id: str):
         "memory": memory.data[0] if memory.data else None,
         "transcripts": transcripts.data,
     }
+    
+async def process_recording_task(
+    recording_id: str, raw_file_path: str, mime_type: str
+):
+    processed_file_path = raw_file_path
+    try:
+        # Stage 1: Preprocessing
+        supabase.table("recordings").update(
+            {"progress_stage": "preprocessing"}
+        ).eq("id", recording_id).execute()
+        processed_file_path = await preprocess_media(raw_file_path, mime_type)
+
+        # Stage 2: Gemini Analysis
+        supabase.table("recordings").update(
+            {"progress_stage": "analyzing"}
+        ).eq("id", recording_id).execute()
+        ai_provider = get_ai_provider()
+        ai_result = await ai_provider.analyze_media(processed_file_path)
+
+        # Stage 3: Saving to Supabase
+        supabase.table("recordings").update(
+            {"progress_stage": "saving"}
+        ).eq("id", recording_id).execute()
+        await save_extraction(recording_id, ai_result)
+
+        # Stage 4: Done
+        supabase.table("recordings").update(
+            {"status": "completed", "progress_stage": "completed"}
+        ).eq("id", recording_id).execute()
+
+    except Exception as e:
+        supabase.table("recordings").update(
+            {"status": "failed", "error_message": str(e)}
+        ).eq("id", recording_id).execute()
+    finally:
+        for path in set([raw_file_path, processed_file_path]):
+            if path and os.path.exists(path):
+                os.remove(path)    
