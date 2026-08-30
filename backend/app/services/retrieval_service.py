@@ -1,35 +1,37 @@
+
 from app.database.supabase import supabase
-from typing import Optional
 
 
-def retrieve_context(question: str, recording_id: Optional[str] = None):
+def retrieve_context(question: str, recording_id: str):
 
-    query = (
+    response = (
         supabase
         .table("transcripts")
         .select("recording_id,start_time,end_time,speaker,text")
+        .eq("recording_id", recording_id)
+        .order("start_time")
+        .execute()
     )
-
-    if recording_id:
-        query = query.eq("recording_id", recording_id)
-
-    response = query.order("start_time").execute()
 
     rows = response.data or []
 
+    if not rows:
+        return []
+
     question_lower = question.lower()
+
+    words = [
+        word
+        for word in question_lower.split()
+        if len(word) > 2
+    ]
 
     matched_rows = []
 
     for row in rows:
+
         speaker = (row.get("speaker") or "").lower()
         text = (row.get("text") or "").lower()
-
-        words = [
-            word
-            for word in question_lower.split()
-            if len(word) > 2
-        ]
 
         score = 0
 
@@ -44,16 +46,22 @@ def retrieve_context(question: str, recording_id: Optional[str] = None):
         if score > 0:
             matched_rows.append((score, row))
 
-    matched_rows.sort(
-        key=lambda item: item[0],
-        reverse=True
-    )
+    # If we found keyword matches, use best matches
+    if matched_rows:
 
-    selected_rows = [
-        row for _, row in matched_rows[:5]
-    ]
+        matched_rows.sort(
+            key=lambda item: item[0],
+            reverse=True
+        )
 
-    return selected_rows
+        return [
+            row
+            for _, row in matched_rows[:5]
+        ]
+
+    # FALLBACK:
+    # If no words match, still give Gemini transcript context
+    return rows[:8]
 
 
 def build_context(rows):
@@ -64,6 +72,7 @@ def build_context(rows):
     parts = []
 
     for row in rows:
+
         parts.append(
             f"[{row['start_time']}-{row['end_time']} seconds] "
             f"{row['speaker']}: {row['text']}"
