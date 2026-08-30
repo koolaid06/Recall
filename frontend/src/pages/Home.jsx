@@ -59,7 +59,7 @@ export default function Home() {
 
         <div className="cover-content">
           <div className="hand-note note-top">
-            things worth remembering
+            i luv u gdg!! <span>— feature not bug</span>
           </div>
 
           <div className="hero-logo-lockup">
@@ -84,24 +84,24 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="cover-doodle doodle-bracket">
+        {/* <div className="cover-doodle doodle-bracket">
           <span />
           <span />
-        </div>
+        </div> */}
 
-        <div className="cover-doodle doodle-star">
-          <span>i luv u gdg</span>
+        {/* <div className="cover-doodle doodle-star">
+          <span>i luv u gdg!!</span>
         </div>
 
         <div className="paper-plane plane-one" aria-hidden="true">
           <span className="plane-body" />
           <span className="plane-trail" />
-        </div>
-
+        </div> */}
+{/* 
         <div className="cover-footer">
           <span>RECORD → REMEMBER</span>
           <span className="cover-page-number">01</span>
-        </div>
+        </div> */}
 
         <div className="turn-hint">
           <span>keep going</span>
@@ -231,8 +231,8 @@ export default function Home() {
               </div>
 
               <div className="memory-map">
-                <div className="scribble-path path-one" />
-                <div className="scribble-path path-two" />
+                {/* <div className="scribble-path path-one" />
+                <div className="scribble-path path-two" /> */}
 
                 <div className="memory-pin pin-one">
                   <small>00:08</small>
@@ -252,10 +252,10 @@ export default function Home() {
                   <span>Delayed to November</span>
                 </div>
 
-                <div className="memory-thread-label">
+                {/* <div className="memory-thread-label">
                   <span>THE THREAD</span>
                   <i />
-                </div>
+                </div> */}
               </div>
 
               <div className="memory-caption">
@@ -271,10 +271,10 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="margin-arrow">
+          {/* <div className="margin-arrow">
             <span>the important part</span>
             <i>→</i>
-          </div>
+          </div> */}
 
           {/* <div className="page-bottom">
             <span>03 / EVIDENCE</span>
@@ -297,7 +297,7 @@ export default function Home() {
           <div className="evidence-layout">
             <div className="evidence-copy">
               <p className="hand-label">
-                underline this
+                so cool
               </p>
 
               <h2>

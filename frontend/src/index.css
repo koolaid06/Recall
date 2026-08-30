@@ -437,7 +437,7 @@ img {
 
   -webkit-text-stroke: 2px var(--ink);
 
-  transform: rotate(-3deg);
+  transform: rotate(-6deg);
 }
 
 .hero-period {
@@ -1172,43 +1172,33 @@ img {
 
 .memory-paper {
   position: relative;
-
   min-height: 470px;
-
   background: #f4eee2;
-
   border: 1px solid rgba(29, 27, 24, 0.2);
-
   box-shadow:
     8px 8px 0 rgba(29, 27, 24, 0.055),
     18px 18px 35px rgba(29, 27, 24, 0.08);
-
   transform: rotate(0.6deg);
+  transition:
+    transform 650ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 650ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .memory-paper-header {
   display: flex;
   justify-content: space-between;
-
   padding: 17px 20px;
-
   border-bottom: 1px solid var(--line);
-
   color: var(--muted);
-
   font-family: var(--mono);
   font-size: 8px;
-
   letter-spacing: 0.08em;
 }
 
 .memory-map {
   position: relative;
-
   height: 340px;
-
   overflow: hidden;
-
   background:
     repeating-linear-gradient(
       0deg,
@@ -1219,98 +1209,91 @@ img {
     #f4eee2;
 }
 
+/* =========================================================
+   MEMORY THREADS
+
+   The threads are deliberately positioned around the actual
+   pin locations. They sit behind the notes and terminate
+   visually at the pin/card edges.
+========================================================= */
+
 .scribble-path {
   position: absolute;
-
+  height: 1.5px;
   border-top: 1.5px solid var(--blue);
-
-  opacity: 0.7;
-
+  opacity: 0.68;
   transform-origin: left center;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 500ms ease;
 }
+
+/* IDEA RAISED → PUSHBACK */
 
 .path-one {
-  width: 330px;
-
-  left: 18%;
-  top: 49%;
-
-  transform:
-    rotate(-14deg)
-    skewX(-20deg);
+  width: 515px;
+  left: 19%;
+  top: 39%;
+  transform: rotate(-10.5deg);
 }
+
+/* PUSHBACK → RESOLVED */
 
 .path-two {
-  width: 230px;
-
-  left: 47%;
-  top: 57%;
-
+  width: 310px;
+  left: 63%;
+  top: 51%;
   border-color: var(--red);
-
-  transform:
-    rotate(16deg)
-    skewX(-15deg);
+  transform: rotate(146deg);
 }
+
+/* =========================================================
+   MEMORY PINS
+========================================================= */
 
 .memory-pin {
   position: absolute;
-
+  z-index: 2;
   width: 150px;
-
   padding: 11px 13px;
-
   background: rgba(244, 238, 226, 0.95);
-
   border: 1px solid rgba(29, 27, 24, 0.24);
-
   box-shadow: 3px 4px 0 rgba(29, 27, 24, 0.06);
-
   transform: rotate(-2deg);
+  transition:
+    opacity 400ms ease,
+    filter 400ms ease;
 }
 
 .memory-pin::before {
   content: "";
-
   position: absolute;
-
   top: -5px;
   left: 50%;
-
   width: 8px;
   height: 8px;
-
   border-radius: 50%;
-
   background: var(--red);
-
   transform: translateX(-50%);
 }
 
 .memory-pin small {
   display: block;
-
   margin-bottom: 5px;
-
   color: var(--red);
-
   font-family: var(--mono);
   font-size: 8px;
 }
 
 .memory-pin strong {
   display: block;
-
   font-size: 13px;
 }
 
 .memory-pin span {
   display: block;
-
   margin-top: 3px;
-
   color: var(--muted);
-
   font-size: 10px;
 }
 
@@ -1322,99 +1305,87 @@ img {
 .pin-two {
   right: 8%;
   top: 29%;
-
   transform: rotate(2deg);
 }
 
 .pin-three {
   left: 34%;
   bottom: 8%;
-
   transform: rotate(-1deg);
 }
 
+/* =========================================================
+   THREAD LABEL
+========================================================= */
+
 .memory-thread-label {
   position: absolute;
-
+  z-index: 3;
   top: 14%;
   left: 43%;
-
   display: flex;
   align-items: center;
-
   gap: 7px;
-
   color: var(--blue);
-
   font-family: var(--hand);
   font-size: 19px;
-
   transform: rotate(-8deg);
+  transition: opacity 400ms ease;
 }
 
 .memory-thread-label i {
   width: 30px;
   height: 1px;
-
   background: var(--blue);
-
   transform: rotate(-15deg);
 }
 
+/* =========================================================
+   MEMORY CAPTION
+========================================================= */
+
 .memory-caption {
   display: grid;
-
   grid-template-columns: 130px 1fr;
-
   gap: 20px;
-
   padding: 19px 20px;
-
   border-top: 1px solid var(--line);
 }
 
 .memory-caption span {
   color: var(--red);
-
   font-family: var(--mono);
   font-size: 8px;
-
   text-transform: uppercase;
 }
 
 .memory-caption p {
   margin: 0;
-
   color: var(--muted);
-
   font-size: 13px;
-
   line-height: 1.6;
 }
 
+/* =========================================================
+   OPTIONAL MARGIN NOTE
+========================================================= */
+
 .margin-arrow {
   position: absolute;
-
   right: -35px;
   bottom: 110px;
-
   display: flex;
   align-items: center;
-
   gap: 8px;
-
   color: var(--red);
-
   font-family: var(--hand);
   font-size: 20px;
-
   transform: rotate(-6deg);
 }
 
 .margin-arrow i {
   font-style: normal;
 }
-
 
 /* =========================================================
    EVIDENCE PAGE
@@ -2304,7 +2275,7 @@ html {
 
 /* Keep the weird handwritten personality alive */
 .hero-c-letter {
-  animation: letterWobble 4s ease-in-out 1400ms infinite alternate;
+  animation: letterWobble 1.5s ease-in-out 1400ms infinite alternate;
 }
 
 .logo-pencil-line {
@@ -3562,87 +3533,257 @@ html {
 }
 
 
-/* =========================================================
-   PROCESSING
-========================================================= */
+/* =========================
+   CENTER PROCESSING CARD
+========================= */
 
-.processing-page {
-  min-height: calc(100vh - 108px);
+.processing-card {
+  width: min(100%, 780px);
+  margin: 55px auto;
 
-  display: flex;
-  flex-direction: column;
+  border: 1px solid var(--strong-line);
+  background: var(--paper-light);
 
-  padding-top: 30px;
+  animation:
+    processing-enter 0.7s
+    cubic-bezier(.22, .61, .36, 1)
+    both;
+
+  text-align: center;
 }
 
+/* Top bar can stay spread apart */
 .processing-topline {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
-  padding-bottom: 13px;
+  padding: 13px 18px;
 
-  border-bottom: 1px solid var(--strong-line);
+  border-bottom: 1px solid var(--line);
 
   color: var(--faint);
 
   font-family: var(--mono);
   font-size: 8px;
-
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 
-.processing-content {
-  width: min(780px, 100%);
+/* Center the icon + heading block */
+.processing-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  margin: auto 0;
+  gap: 18px;
 
-  padding: 55px 0;
+  padding: 42px 42px 10px;
+
+  text-align: center;
 }
 
-.processing-content h1 {
-  margin: 10px 0 20px;
-
-  font-size: clamp(55px, 7vw, 95px);
-  line-height: 0.86;
-
-  letter-spacing: -0.08em;
+.processing-header > div:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.processing-content h1 em {
+.processing-hand {
+  margin: 0 0 5px;
+
   color: var(--red);
-  font-style: normal;
+
+  font-family: var(--hand);
+  font-size: 22px;
+
+  transform: rotate(-2deg);
 }
 
-.processing-content > p:not(.upload-kicker) {
-  max-width: 500px;
+.processing-header h2 {
+  margin: 0;
 
-  margin: 0 0 35px;
+  font-size: clamp(35px, 5vw, 60px);
+
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+/* Center description */
+.processing-description {
+  max-width: 580px;
+
+  margin: 18px auto 34px;
+
+  padding: 0 30px;
 
   color: var(--muted);
 
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.75;
+
+  text-align: center;
 }
 
+/* Keep progress nicely centered */
+.processing-progress {
+  width: calc(100% - 84px);
 
-/* Keep ProcessingState visually inside our system */
-.processing-content .processing-state,
-.processing-content .processing-container {
-  width: 100%;
+  margin: 0 auto;
 
-  margin: 0;
+  height: 2px;
 
-  padding: 25px 0;
-
-  border: 0;
-
-  border-top: 1px solid var(--strong-line);
-
-  background: transparent;
-
-  box-shadow: none;
+  background: var(--line);
 }
 
+.processing-progress span {
+  display: block;
+
+  height: 100%;
+
+  background: var(--red);
+
+  transition:
+    width 0.7s
+    cubic-bezier(.22, .61, .36, 1);
+}
+
+/* =========================
+   CENTER THE STAGE LIST
+========================= */
+
+.processing-stages {
+  margin-top: 38px;
+
+  border-top: 1px solid var(--line);
+}
+
+.processing-stage {
+  display: grid;
+
+  grid-template-columns:
+    70px
+    minmax(0, 1fr)
+    70px;
+
+  align-items: center;
+
+  gap: 16px;
+
+  padding: 16px 42px;
+
+  border-bottom: 1px solid var(--line);
+
+  color: var(--faint);
+
+  transition:
+    color 0.3s ease,
+    background 0.3s ease;
+}
+
+.stage-number {
+  text-align: center;
+}
+
+.stage-name {
+  text-align: center;
+
+  font-size: 14px;
+}
+
+.stage-status {
+  min-width: auto;
+
+  text-align: center;
+}
+
+.stage-number,
+.stage-status {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.processing-stage.done {
+  color: var(--muted);
+}
+
+.processing-stage.done .stage-status {
+  color: var(--ink);
+}
+
+.processing-stage.current {
+  background: rgba(0, 0, 0, 0.025);
+
+  color: var(--ink);
+}
+
+.processing-stage.current .stage-number,
+.processing-stage.current .stage-status {
+  color: var(--red);
+}
+
+/* Bottom current status centered */
+.processing-current {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  padding: 18px 42px;
+
+  color: var(--muted);
+
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+
+  text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .processing-card {
+    margin: 30px auto;
+  }
+
+  .processing-header {
+    padding: 34px 22px 10px;
+  }
+
+  .processing-description {
+    padding: 0 22px;
+  }
+
+  .processing-progress {
+    width: calc(100% - 44px);
+  }
+
+  .processing-stage {
+    grid-template-columns: 40px minmax(0, 1fr);
+
+    padding: 15px 18px;
+
+    gap: 10px;
+  }
+
+  .stage-number {
+    text-align: left;
+  }
+
+  .stage-name {
+    text-align: left;
+  }
+
+  .stage-status {
+    display: none;
+  }
+
+  .processing-current {
+    padding: 16px 22px;
+  }
+}
 
 /* =========================================================
    ENTRY MOTION
@@ -5410,4 +5551,538 @@ animation: none;
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.04em;
+}
+
+/* =========================================================
+FINAL MEMORY PAPER INTERACTION
+Capture → Trace → Confirm
+
+IMPORTANT:
+This version never animates the transform of .path-one
+or .path-two, because those transforms define the actual
+geometry and alignment of the memory threads.
+========================================================= */
+
+.memory-paper {
+position: relative;
+overflow: hidden;
+isolation: isolate;
+
+transition:
+transform 650ms cubic-bezier(0.16, 1, 0.3, 1),
+box-shadow 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.memory-layout {
+position: relative;
+}
+
+/* =========================================================
+SAFE TRANSITION SETUP
+========================================================= */
+
+.memory-pin,
+.scribble-path,
+.memory-thread-label,
+.memory-thread-label i {
+will-change: opacity;
+}
+
+.memory-pin {
+transition:
+opacity 400ms ease,
+filter 400ms ease;
+}
+
+.scribble-path {
+transition:
+opacity 500ms ease;
+}
+
+/* =========================================================
+PRESERVE THREAD GEOMETRY
+
+These transforms are the actual geometry of the threads.
+They must never be overwritten by keyframes.
+========================================================= */
+
+.path-one {
+transform:
+rotate(-14deg)
+skewX(-20deg);
+}
+
+.path-two {
+transform:
+rotate(16deg)
+skewX(-15deg);
+}
+
+/* =========================================================
+PIN ROTATIONS
+========================================================= */
+
+.pin-one {
+--pin-rotation: -2deg;
+}
+
+.pin-two {
+--pin-rotation: 2deg;
+}
+
+.pin-three {
+--pin-rotation: -1deg;
+}
+
+/* =========================================================
+PHASE 01 — CAPTURE
+
+Moments arrive one by one.
+Threads reveal through opacity only.
+========================================================= */
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.memory-paper {
+transform:
+rotate(0.6deg)
+translateY(-3px);
+}
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.scribble-path {
+opacity: 0.28;
+}
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.memory-pin {
+opacity: 0.5;
+}
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.pin-one {
+opacity: 1;
+
+animation:
+memoryCaptureOne
+650ms cubic-bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.pin-two {
+animation:
+memoryCaptureTwo
+780ms cubic-bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.pin-three {
+animation:
+memoryCaptureThree
+920ms cubic-bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+/* Thread reveal — opacity only */
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.path-one {
+animation:
+memoryThreadReveal
+700ms ease
+both;
+}
+
+.memory-layout:has(.feature-row:nth-child(1).active)
+.path-two {
+animation:
+memoryThreadReveal
+700ms 160ms ease
+both;
+}
+
+/* =========================================================
+PHASE 02 — TRACE
+
+The connection becomes alive.
+Threads pulse instead of physically moving.
+========================================================= */
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.memory-paper {
+transform:
+rotate(-0.25deg)
+translateY(-4px);
+}
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.scribble-path {
+opacity: 0.8;
+}
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.path-one {
+animation:
+memoryThreadPulse
+1.8s ease-in-out
+infinite;
+}
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.path-two {
+animation:
+memoryThreadPulse
+1.8s 250ms ease-in-out
+infinite;
+}
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.memory-pin {
+opacity: 0.72;
+}
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.pin-one {
+animation:
+memoryTracePin
+2.1s ease-in-out
+infinite;
+}
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.pin-two {
+animation:
+memoryTracePin
+2.1s 300ms ease-in-out
+infinite;
+}
+
+.memory-layout:has(.feature-row:nth-child(2).active)
+.pin-three {
+animation:
+memoryTracePin
+2.1s 600ms ease-in-out
+infinite;
+}
+
+/* =========================================================
+PHASE 03 — CONFIRM
+
+Earlier moments fade.
+The resolved moment gets emphasized.
+========================================================= */
+
+.memory-layout:has(.feature-row:nth-child(3).active)
+.memory-paper {
+transform:
+rotate(0.2deg)
+translateY(-5px);
+
+box-shadow:
+10px 10px 0 rgba(29, 27, 24, 0.06),
+22px 24px 45px rgba(29, 27, 24, 0.12);
+}
+
+.memory-layout:has(.feature-row:nth-child(3).active)
+.pin-one,
+.memory-layout:has(.feature-row:nth-child(3).active)
+.pin-two {
+opacity: 0.35;
+}
+
+.memory-layout:has(.feature-row:nth-child(3).active)
+.pin-three {
+z-index: 4;
+opacity: 1;
+
+animation:
+memoryConfirm
+800ms cubic-bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+.memory-layout:has(.feature-row:nth-child(3).active)
+.pin-three strong {
+color: var(--red);
+}
+
+.memory-layout:has(.feature-row:nth-child(3).active)
+.scribble-path {
+opacity: 0.45;
+}
+
+.memory-layout:has(.feature-row:nth-child(3).active)
+.memory-thread-label {
+animation:
+memoryThreadLabelConfirm
+700ms cubic-bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+/* =========================================================
+CAPTION TRANSITIONS
+========================================================= */
+
+.memory-caption {
+position: relative;
+}
+
+.memory-layout:has(.feature-row.active)
+.memory-caption span {
+animation:
+memoryCaptionIn
+450ms cubic-bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+.memory-layout:has(.feature-row.active)
+.memory-caption p {
+animation:
+memoryCaptionIn
+550ms 60ms cubic-bezier(0.16, 1, 0.3, 1)
+both;
+}
+
+/* =========================================================
+KEYFRAMES
+========================================================= */
+
+@keyframes memoryCaptureOne {
+0% {
+opacity: 0;
+
+
+transform:
+  translate3d(-24px, 18px, 0)
+  rotate(-7deg)
+  scale(0.82);
+
+
+}
+
+70% {
+transform:
+translate3d(2px, -2px, 0)
+rotate(-1deg)
+scale(1.03);
+}
+
+100% {
+opacity: 1;
+
+
+transform:
+  translate3d(0, 0, 0)
+  rotate(-2deg)
+  scale(1);
+
+
+}
+}
+
+@keyframes memoryCaptureTwo {
+0% {
+opacity: 0;
+
+
+transform:
+  translate3d(26px, -18px, 0)
+  rotate(7deg)
+  scale(0.82);
+
+
+}
+
+70% {
+transform:
+translate3d(-2px, 2px, 0)
+rotate(1deg)
+scale(1.03);
+}
+
+100% {
+opacity: 1;
+
+
+transform:
+  translate3d(0, 0, 0)
+  rotate(2deg)
+  scale(1);
+
+
+}
+}
+
+@keyframes memoryCaptureThree {
+0% {
+opacity: 0;
+
+
+transform:
+  translate3d(-10px, 28px, 0)
+  rotate(-6deg)
+  scale(0.8);
+
+
+}
+
+70% {
+transform:
+translate3d(2px, -3px, 0)
+rotate(1deg)
+scale(1.04);
+}
+
+100% {
+opacity: 1;
+
+
+transform:
+  translate3d(0, 0, 0)
+  rotate(-1deg)
+  scale(1);
+
+
+}
+}
+
+/* SAFE THREAD ANIMATIONS
+No transform property here. */
+
+@keyframes memoryThreadReveal {
+from {
+opacity: 0;
+}
+
+to {
+opacity: 0.75;
+}
+}
+
+@keyframes memoryThreadPulse {
+0%,
+100% {
+opacity: 0.45;
+}
+
+50% {
+opacity: 1;
+}
+}
+
+/* Pin movement is safe because it preserves rotation */
+
+@keyframes memoryTracePin {
+0%,
+100% {
+transform:
+translate3d(0, 0, 0)
+rotate(var(--pin-rotation))
+scale(1);
+}
+
+50% {
+transform:
+translate3d(0, -5px, 0)
+rotate(var(--pin-rotation))
+scale(1.035);
+}
+}
+
+@keyframes memoryConfirm {
+0% {
+opacity: 0.45;
+
+
+transform:
+  translate3d(0, 12px, 0)
+  rotate(-6deg)
+  scale(0.88);
+
+
+}
+
+55% {
+opacity: 1;
+
+
+transform:
+  translate3d(0, -4px, 0)
+  rotate(2deg)
+  scale(1.08);
+
+
+}
+
+100% {
+opacity: 1;
+
+
+transform:
+  translate3d(0, 0, 0)
+  rotate(-1deg)
+  scale(1);
+
+
+}
+}
+
+@keyframes memoryThreadLabelConfirm {
+from {
+opacity: 0.25;
+}
+
+to {
+opacity: 1;
+}
+}
+
+@keyframes memoryCaptionIn {
+from {
+opacity: 0;
+
+
+transform:
+  translate3d(0, 10px, 0);
+
+
+}
+
+to {
+opacity: 1;
+
+
+transform:
+  translate3d(0, 0, 0);
+
+
+}
+}
+
+/* =========================================================
+MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+.memory-layout:has(.feature-row.active)
+.memory-paper {
+transform: none;
+}
+
+.memory-thread-label {
+left: 48%;
+}
+}
+
+/* =========================================================
+REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+.memory-layout:has(.feature-row.active) *,
+.memory-layout:has(.feature-row.active) {
+animation: none !important;
+transition: none !important;
+}
 }
