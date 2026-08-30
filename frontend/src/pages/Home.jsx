@@ -1,254 +1,436 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 const features = [
-  ["01", "Capture", "Every recording becomes a structured memory — people, decisions, open questions, and the moments that mattered."],
-  ["02", "Trace", "Watch an idea move: where it started, what pushed back on it, and the moment it became a decision."],
-  ["03", "Confirm", "No answer without a source. Every insight links back to the exact second it happened."]
+  {
+    number: "01",
+    title: "Capture",
+    description:
+      "Every recording becomes a structured memory — people, decisions, open questions, and the moments that mattered.",
+  },
+  {
+    number: "02",
+    title: "Trace",
+    description:
+      "Watch an idea move: where it started, what pushed back on it, and the moment it became a decision.",
+  },
+  {
+    number: "03",
+    title: "Confirm",
+    description:
+      "No answer without a source. Every insight links back to the exact second it happened.",
+  },
 ];
 
 export default function Home() {
   const [active, setActive] = useState(0);
-  const cursor = useRef(null);
 
-  const memoryScrollRef = useRef(null);
-  const memoryStatementRef = useRef(null);
-  const memoryContentRef = useRef(null);
 
   useEffect(() => {
-    const move = e => cursor.current?.style.setProperty("transform", `translate3d(${e.clientX - 90}px, ${e.clientY - 90}px, 0)`);
-    window.addEventListener("pointermove", move);
-    return () => window.removeEventListener("pointermove", move);
-  }, []);
-
-  // Apple-style cinematic scroll: one pinned stage, with the
-  // statement acting as the opening scene and the memory UI
-  // emerging only after the statement has cleared the stage.
-  useEffect(() => {
-    const section = memoryScrollRef.current;
-    const statement = memoryStatementRef.current;
-    const content = memoryContentRef.current;
-    if (!section || !statement || !content) return;
-
-    const desktop = window.matchMedia("(min-width: 951px)");
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    let raf = 0;
-    let target = 0;
-    let current = 0;
-    let enabled = false;
-
-    const clamp = (value, min = 0, max = 1) =>
-      Math.min(max, Math.max(min, value));
-
-    const smooth = (value) => value * value * (3 - 2 * value);
-
-    const range = (value, start, end) =>
-      smooth(clamp((value - start) / (end - start)));
-
-    const render = (progress) => {
-      /*
-       * Scene 01 — the statement owns the screen.
-       * Scene 02 — the statement leaves completely before the UI enters.
-       * Scene 03 — the UI settles and gets a subtle zoom-in.
-       */
-      const statementOut = range(progress, 0.18, 0.43);
-      const contentIn = range(progress, 0.43, 0.66);
-      const contentSettle = range(progress, 0.66, 0.92);
-
-      const statementOpacity = 1 - statementOut;
-      const statementScale = 1 - statementOut * 0.16;
-      const statementY = -statementOut * 105;
-      const statementBlur = statementOut * 9;
-
-      const contentOpacity = contentIn;
-      const contentScale = 0.91 + contentIn * 0.09;
-      const contentY = 90 - contentIn * 90;
-      const contentBlur = (1 - contentIn) * 12;
-      const settleScale = 1 + contentSettle * 0.025;
-
-      statement.style.opacity = statementOpacity.toFixed(4);
-      statement.style.transform = `translate3d(0, ${statementY}px, 0) scale(${statementScale})`;
-      statement.style.filter = `blur(${statementBlur}px)`;
-      statement.style.pointerEvents = statementOpacity < 0.02 ? "none" : "auto";
-
-      content.style.opacity = contentOpacity.toFixed(4);
-      content.style.transform = `translate3d(0, ${contentY}px, 0) scale(${contentScale * settleScale})`;
-      content.style.filter = `blur(${contentBlur}px)`;
-      content.style.pointerEvents = contentOpacity < 0.02 ? "none" : "auto";
-
-      section.style.setProperty("--memory-progress", progress.toFixed(4));
-      section.style.setProperty("--memory-glow", (contentIn * 0.75).toFixed(4));
-    };
-
-    const measure = () => {
-      if (!enabled) return;
-      const rect = section.getBoundingClientRect();
-      const distance = Math.max(1, section.offsetHeight - window.innerHeight);
-      target = clamp(-rect.top / distance);
-    };
-
-    const animate = () => {
-      current += (target - current) * 0.085;
-      if (Math.abs(target - current) < 0.00035) current = target;
-      render(current);
-      raf = requestAnimationFrame(animate);
-    };
-
-    const reset = () => {
-      statement.style.opacity = "";
-      statement.style.transform = "";
-      statement.style.filter = "";
-      statement.style.pointerEvents = "";
-      content.style.opacity = "";
-      content.style.transform = "";
-      content.style.filter = "";
-      content.style.pointerEvents = "";
-      section.style.removeProperty("--memory-progress");
-      section.style.removeProperty("--memory-glow");
-    };
-
-    const applyMode = () => {
-      enabled = desktop.matches && !reduceMotion.matches;
-      section.classList.toggle("is-pinned", enabled);
-
-      cancelAnimationFrame(raf);
-
-      if (!enabled) {
-        reset();
-        return;
-      }
-
-      current = 0;
-      target = 0;
-      measure();
-      render(0);
-      raf = requestAnimationFrame(animate);
-    };
-
-    const onScroll = () => measure();
-    const onResize = () => applyMode();
-
-    applyMode();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    desktop.addEventListener?.("change", onResize);
-    reduceMotion.addEventListener?.("change", onResize);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      desktop.removeEventListener?.("change", onResize);
-      reduceMotion.removeEventListener?.("change", onResize);
-      reset();
-    };
+    const sections = document.querySelectorAll(".notebook-page");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: "0px 0px -6% 0px" });
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
   }, []);
 
   return (
     <div className="home-page">
-      <div className="ambient-cursor" ref={cursor} />
-      <Navbar home />
+<Navbar home />
 
-      <section className="hero">
-        <div className="orb orb-top" /><div className="orb orb-bottom" /><div className="orb orb-violet" />
-        <div className="hero-content">
-          <h1 className="hero-title reveal delay-1">
-  RE
-  <svg
-    className="hero-logo-c"
-    viewBox="0 0 800 800"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-label="C"
-  >
-    <path
-      d="M 663.11,304.23 L 664.66,308.35 L 666.15,312.50 L 667.58,316.66 L 668.96,320.84 L 670.27,325.05 L 671.52,329.27 L 672.70,333.52 L 673.83,337.79 L 674.88,342.07 L 675.88,346.37 L 676.80,350.69 L 677.67,355.03 L 678.46,359.38 L 679.19,363.74 L 679.85,368.12 L 680.44,372.50 L 680.97,376.90 L 681.43,381.31 L 681.82,385.72 L 682.14,390.15 L 682.39,394.58 L 682.58,399.01 L 682.69,403.45 L 682.74,407.90 L 682.72,412.34 L 682.62,416.79 L 682.46,421.24 L 682.23,425.69 L 681.94,430.13 L 681.57,434.57 L 681.13,439.01 L 680.62,443.44 L 680.05,447.87 L 679.40,452.29 L 678.69,456.70 L 677.90,461.10 L 677.05,465.49 L 676.13,469.87 L 675.14,474.24 L 674.08,478.59 L 672.95,482.93 L 671.76,487.25 L 670.49,491.56 L 669.16,495.84 L 667.76,500.11 L 666.30,504.36 L 664.77,508.59 L 663.17,512.79 L 661.50,516.98 L 659.77,521.13 L 657.97,525.26 L 656.11,529.37 L 654.18,533.45 L 652.19,537.50 L 650.13,541.52 L 648.01,545.51 L 645.83,549.47 L 643.58,553.39 L 641.27,557.28 L 638.90,561.14 L 636.47,564.96 L 633.98,568.75 L 631.43,572.50 L 628.81,576.21 L 626.14,579.88 L 623.41,583.51 L 620.62,587.10 L 617.77,590.65 L 614.87,594.15 L 611.91,597.61 L 608.90,601.03 L 605.83,604.40 L 602.71,607.72 L 599.53,611.00 L 596.30,614.22 L 593.02,617.40 L 589.68,620.53 L 586.30,623.61 L 582.87,626.63 L 579.39,629.60 L 575.86,632.52 L 572.28,635.39 L 568.66,638.20 L 564.99,640.96 L 561.27,643.66 L 557.51,646.30 L 553.71,648.88 L 549.87,651.41 L 545.99,653.88 L 542.06,656.28 L 538.10,658.63 L 534.09,660.92 L 530.05,663.14 L 525.97,665.30 L 521.86,667.40 L 517.71,669.43 L 513.53,671.41 L 509.32,673.31 L 505.07,675.15 L 500.79,676.93 L 496.49,678.64 L 492.15,680.28 L 487.79,681.85 L 483.40,683.36 L 478.98,684.80 L 474.54,686.17 L 470.08,687.47 L 465.59,688.70 L 461.08,689.87 L 456.56,690.96 L 452.01,691.98 L 447.44,692.93 L 442.86,693.81 L 438.26,694.62 L 433.65,695.35 L 429.02,696.02 L 424.39,696.61 L 419.74,697.13 L 415.07,697.57 L 410.40,697.95 L 405.73,698.25 L 401.04,698.48 L 396.35,698.63 L 391.66,698.71 L 386.96,698.72 L 382.26,698.65 L 377.56,698.51 L 372.85,698.29 L 368.15,698.00 L 363.45,697.64 L 358.76,697.21 L 354.07,696.69 L 349.38,696.11 L 344.71,695.45 L 340.04,694.72 L 335.38,693.92 L 330.73,693.04 L 326.09,692.08 L 321.47,691.06 L 316.86,689.96 L 312.26,688.79 L 307.68,687.54 L 303.12,686.23 L 298.57,684.84 L 294.05,683.38 L 289.55,681.84 L 285.06,680.24 L 280.61,678.57 L 276.17,676.82 L 271.76,675.00 L 267.38,673.12 L 263.03,671.16 L 258.70,669.14 L 254.40,667.04 L 250.14,664.88 L 245.91,662.65 L 241.71,660.35 L 237.54,657.98 L 233.41,655.55 L 229.31,653.05 L 225.26,650.49 L 221.24,647.86 L 217.26,645.17 L 213.32,642.41 L 209.42,639.59 L 205.56,636.71 L 201.75,633.77 L 197.98,630.76 L 194.26,627.70 L 190.59,624.57 L 186.96,621.38 L 183.38,618.14 L 179.85,614.84 L 176.36,611.48 L 172.94,608.07 L 169.56,604.60 L 166.23,601.07 L 162.96,597.49 L 159.75,593.86 L 156.58,590.18 L 153.48,586.44 L 150.43,582.66 L 147.44,578.82 L 144.51,574.94 L 141.64,571.00 L 138.83,567.02 L 136.08,563.00 L 133.40,558.93 L 130.77,554.81 L 128.21,550.66 L 125.71,546.46 L 123.28,542.21 L 120.91,537.93 L 118.61,533.61 L 116.38,529.25 L 114.21,524.86 L 112.11,520.43 L 110.08,515.96 L 108.12,511.46 L 106.23,506.92 L 104.41,502.36 L 102.66,497.76 L 100.98,493.13 L 99.38,488.48 L 97.84,483.80 L 96.38,479.09 L 94.99,474.35 L 93.68,469.59 L 92.44,464.81 L 91.27,460.01 L 90.18,455.19 L 89.17,450.34 L 88.23,445.48 L 87.37,440.60 L 86.58,435.71 L 85.87,430.80 L 85.23,425.88 L 84.68,420.94 L 84.20,416.00 L 83.79,411.04 L 83.47,406.08 L 83.22,401.11 L 83.05,396.13 L 82.96,391.14 L 82.95,386.16 L 83.02,381.17 L 83.16,376.18 L 83.38,371.19 L 83.68,366.20 L 84.06,361.21 L 84.52,356.22 L 85.06,351.24 L 85.67,346.27 L 86.37,341.31 L 87.14,336.35 L 87.99,331.40 L 88.92,326.46 L 89.93,321.54 L 91.01,316.63 L 92.17,311.73 L 93.41,306.85 L 94.73,301.99 L 96.13,297.14 L 97.60,292.32 L 99.14,287.51 L 100.77,282.73 L 102.47,277.97 L 104.24,273.24 L 106.09,268.53 L 108.02,263.85 L 110.02,259.19 L 112.09,254.57 L 114.24,249.97 L 116.46,245.41 L 118.76,240.88 L 121.12,236.38 L 123.56,231.92 L 126.07,227.50 L 128.65,223.11 L 131.30,218.76 L 134.02,214.45 L 136.81,210.18 L 139.67,205.95 L 142.59,201.77 L 145.58,197.63 L 148.64,193.53 L 151.77,189.48 L 154.96,185.48 L 158.21,181.53 L 161.53,177.62 L 164.91,173.77 L 168.35,169.97 L 171.86,166.22 L 175.42,162.52 L 179.05,158.87 L 182.73,155.29 L 186.48,151.75 L 190.27,148.28 L 194.13,144.86 L 198.04,141.51 L 202.01,138.21 L 206.03,134.97 L 210.10,131.80 L 214.23,128.68 L 218.40,125.63 L 222.63,122.65 L 226.90,119.73 L 231.22,116.87 L 235.59,114.09 L 240.01,111.37 L 244.47,108.71 L 248.97,106.13 L 253.52,103.62 L 258.11,101.17 L 262.73,98.80 L 267.40,96.50 L 272.11,94.27 L 276.85,92.11 L 281.63,90.03 L 286.45,88.02 L 286.45,88.02 L 291.83,86.30 L 297.34,85.00 L 302.92,84.14 L 308.56,83.72 L 314.22,83.75 L 319.85,84.22 L 325.43,85.13 L 330.92,86.47 L 336.29,88.24 L 341.50,90.43 L 346.53,93.01 L 351.34,95.99 L 355.90,99.33 L 360.18,103.02 L 364.16,107.04 L 367.81,111.35 L 371.11,115.94 L 374.05,120.77 L 376.59,125.82 L 378.73,131.05 L 380.46,136.44 L 381.75,141.94 L 382.61,147.53 L 383.03,153.17 L 383.01,158.82 L 382.54,164.45 L 381.63,170.03 L 380.29,175.53 L 378.52,180.89 L 376.33,186.11 L 373.74,191.13 L 370.77,195.94 L 367.42,200.50 L 363.73,204.78 L 359.72,208.76 L 355.40,212.42 L 350.81,215.72 L 345.98,218.65 L 340.93,221.20 L 335.70,223.34 L 335.70,223.34 L 332.86,224.18 L 330.03,225.07 L 327.22,226.01 L 324.42,226.99 L 321.62,228.02 L 318.85,229.09 L 316.09,230.21 L 313.34,231.37 L 310.61,232.58 L 307.89,233.83 L 305.19,235.13 L 302.51,236.47 L 299.85,237.85 L 297.21,239.28 L 294.59,240.75 L 291.99,242.26 L 289.41,243.81 L 286.86,245.41 L 284.32,247.05 L 281.81,248.73 L 279.33,250.45 L 276.87,252.21 L 274.43,254.02 L 272.03,255.86 L 269.64,257.74 L 267.29,259.66 L 264.97,261.62 L 262.67,263.62 L 260.40,265.66 L 258.17,267.74 L 255.96,269.85 L 253.79,272.00 L 251.64,274.19 L 249.54,276.41 L 247.46,278.66 L 245.42,280.96 L 243.41,283.28 L 241.44,285.64 L 239.50,288.03 L 237.60,290.46 L 235.74,292.92 L 233.91,295.41 L 232.12,297.93 L 230.37,300.48 L 228.66,303.06 L 226.99,305.67 L 225.35,308.31 L 223.76,310.98 L 222.21,313.67 L 220.70,316.39 L 219.23,319.14 L 217.81,321.91 L 216.42,324.71 L 215.08,327.53 L 213.79,330.38 L 212.53,333.25 L 211.32,336.14 L 210.16,339.05 L 209.04,341.98 L 207.97,344.94 L 206.94,347.91 L 205.96,350.90 L 205.03,353.91 L 204.14,356.94 L 203.30,359.98 L 202.50,363.04 L 201.76,366.11 L 201.06,369.20 L 200.41,372.31 L 199.81,375.42 L 199.26,378.55 L 198.76,381.69 L 198.30,384.83 L 197.90,387.99 L 197.55,391.16 L 197.24,394.34 L 196.99,397.52 L 196.78,400.71 L 196.63,403.90 L 196.52,407.11 L 196.47,410.31 L 196.47,413.52 L 196.52,416.73 L 196.62,419.94 L 196.77,423.16 L 196.97,426.37 L 197.22,429.58 L 197.52,432.79 L 197.87,436.00 L 198.28,439.21 L 198.74,442.41 L 199.24,445.61 L 199.80,448.80 L 200.41,451.99 L 201.07,455.17 L 201.78,458.34 L 202.54,461.50 L 203.35,464.65 L 204.21,467.80 L 205.13,470.93 L 206.09,474.05 L 207.10,477.15 L 208.17,480.25 L 209.28,483.32 L 210.44,486.39 L 211.65,489.43 L 212.91,492.46 L 214.22,495.48 L 215.58,498.47 L 216.99,501.45 L 218.44,504.40 L 219.95,507.33 L 221.50,510.25 L 223.09,513.14 L 224.74,516.00 L 226.43,518.85 L 228.16,521.67 L 229.95,524.46 L 231.78,527.23 L 233.65,529.97 L 235.57,532.68 L 237.53,535.36 L 239.54,538.02 L 241.59,540.65 L 243.68,543.24 L 245.82,545.80 L 247.99,548.34 L 250.21,550.84 L 252.47,553.30 L 254.78,555.73 L 257.12,558.13 L 259.50,560.49 L 261.92,562.82 L 264.38,565.11 L 266.87,567.36 L 269.41,569.58 L 271.98,571.75 L 274.59,573.89 L 277.23,575.99 L 279.91,578.05 L 282.62,580.06 L 285.37,582.04 L 288.14,583.97 L 290.96,585.86 L 293.80,587.71 L 296.68,589.51 L 299.58,591.27 L 302.52,592.98 L 305.48,594.65 L 308.47,596.28 L 311.50,597.85 L 314.54,599.38 L 317.62,600.87 L 320.72,602.30 L 323.84,603.69 L 326.99,605.03 L 330.16,606.32 L 333.36,607.56 L 336.58,608.75 L 339.81,609.90 L 343.07,610.99 L 346.35,612.03 L 349.65,613.02 L 352.96,613.95 L 356.29,614.84 L 359.64,615.67 L 363.00,616.46 L 366.38,617.18 L 369.77,617.86 L 373.17,618.48 L 376.59,619.05 L 380.02,619.57 L 383.46,620.03 L 386.90,620.44 L 390.36,620.79 L 393.82,621.09 L 397.30,621.33 L 400.77,621.52 L 404.26,621.66 L 407.74,621.74 L 411.23,621.76 L 414.73,621.73 L 418.22,621.64 L 421.72,621.50 L 425.21,621.31 L 428.71,621.05 L 432.20,620.75 L 435.69,620.38 L 439.18,619.96 L 442.66,619.49 L 446.14,618.96 L 449.61,618.37 L 453.08,617.73 L 456.53,617.04 L 459.98,616.29 L 463.42,615.48 L 466.85,614.62 L 470.26,613.71 L 473.67,612.74 L 477.06,611.71 L 480.43,610.63 L 483.79,609.50 L 487.14,608.31 L 490.47,607.07 L 493.78,605.78 L 497.07,604.43 L 500.35,603.03 L 503.60,601.58 L 506.83,600.08 L 510.04,598.52 L 513.23,596.91 L 516.39,595.25 L 519.53,593.54 L 522.65,591.78 L 525.73,589.96 L 528.80,588.10 L 531.83,586.19 L 534.84,584.23 L 537.81,582.22 L 540.76,580.16 L 543.67,578.05 L 546.56,575.90 L 549.41,573.70 L 552.22,571.45 L 555.01,569.16 L 557.76,566.82 L 560.47,564.44 L 563.15,562.01 L 565.79,559.54 L 568.39,557.03 L 570.96,554.47 L 573.48,551.87 L 575.97,549.23 L 578.41,546.55 L 580.82,543.83 L 583.18,541.07 L 585.50,538.27 L 587.77,535.43 L 590.01,532.55 L 592.20,529.64 L 594.34,526.69 L 596.44,523.70 L 598.49,520.68 L 600.49,517.63 L 602.45,514.54 L 604.36,511.42 L 606.22,508.27 L 608.04,505.09 L 609.80,501.87 L 611.51,498.63 L 613.17,495.36 L 614.78,492.06 L 616.34,488.73 L 617.85,485.37 L 619.30,481.99 L 620.71,478.59 L 622.06,475.16 L 623.35,471.71 L 624.59,468.24 L 625.78,464.74 L 626.91,461.22 L 627.98,457.69 L 629.00,454.13 L 629.97,450.56 L 630.87,446.97 L 631.73,443.37 L 632.52,439.75 L 633.26,436.11 L 633.94,432.46 L 634.56,428.80 L 635.12,425.13 L 635.63,421.44 L 636.07,417.75 L 636.46,414.05 L 636.79,410.34 L 637.06,406.62 L 637.27,402.90 L 637.42,399.17 L 637.51,395.44 L 637.55,391.70 L 637.52,387.97 L 637.43,384.23 L 637.28,380.49 L 637.08,376.75 L 636.81,373.02 L 636.48,369.29 L 636.09,365.56 L 635.65,361.83 L 635.14,358.12 L 634.57,354.40 L 633.94,350.70 L 633.25,347.01 L 632.50,343.32 L 631.69,339.65 L 630.82,335.99 L 629.89,332.34 L 628.89,328.71 L 627.84,325.09 L 626.72,321.49 L 625.53,317.92 L 625.53,317.92 L 625.05,316.42 L 624.69,314.89 L 624.45,313.34 L 624.33,311.77 L 624.34,310.20 L 624.47,308.64 L 624.72,307.09 L 625.09,305.56 L 625.59,304.07 L 626.19,302.62 L 626.91,301.23 L 627.74,299.89 L 628.67,298.62 L 629.69,297.43 L 630.81,296.33 L 632.01,295.31 L 633.28,294.40 L 634.62,293.58 L 636.03,292.88 L 637.48,292.28 L 638.98,291.80 L 640.50,291.44 L 642.06,291.20 L 643.62,291.09 L 645.19,291.09 L 646.76,291.22 L 648.31,291.48 L 649.83,291.85 L 651.32,292.34 L 652.77,292.95 L 654.17,293.67 L 655.50,294.49 L 656.77,295.42 L 657.96,296.45 L 659.07,297.56 L 660.08,298.76 L 661.00,300.04 L 661.81,301.38 L 662.52,302.78 L 663.11,304.23 Z"
-      fill="currentColor"
-    />
-  </svg>
-  ALL
-  <span>.</span>
-</h1>
-          <p className="hero-subtitle reveal delay-2">Turn moments into memory.</p>
-          <p className="hero-description reveal delay-3">Transform recordings into a living memory of what happened, why it changed, and what still matters.</p>
-          <div className="hero-actions reveal delay-4">
-            <Link to="/upload" className="button button-primary">Start remembering <span>↗</span></Link>
-            <a href="#features" className="button button-ghost">Explore RECALL</a>
-          </div>
+      {/* =====================================================
+          NOTEBOOK COVER / HERO
+      ===================================================== */}
+
+      <section className="notebook-cover" aria-label="RECALL introduction">
+        <div className="paper-noise" />
+
+        <div className="cover-margin">
+          <span>FIELD NOTES / 2026</span>
+          <span>VOL. 01</span>
         </div>
-        {/* <div className="scroll-cue"><span>Scroll to explore</span><span className="scroll-line" /></div> */}
+
+        <div className="cover-content">
+          <div className="hand-note note-top">
+            things worth remembering
+          </div>
+
+          <div className="hero-logo-lockup">
+            <div className="hero-wordmark">
+              RE
+              <span className="hero-c-letter">C</span>
+              ALL
+              <span className="hero-period">.</span>
+            </div>
+
+            <div className="logo-pencil-line" />
+          </div>
+
+          <p className="cover-subtitle">
+            Turn moments into memory.
+          </p>
+
+          <p className="cover-description">
+            RECALL turns conversations and recordings into
+            something you can actually return to: what happened,
+            why it changed, and what still matters.
+          </p>
+        </div>
+
+        <div className="cover-doodle doodle-bracket">
+          <span />
+          <span />
+        </div>
+
+        <div className="cover-doodle doodle-star">
+          <span>i luv u gdg</span>
+        </div>
+
+        <div className="paper-plane plane-one" aria-hidden="true">
+          <span className="plane-body" />
+          <span className="plane-trail" />
+        </div>
+
+        <div className="cover-footer">
+          <span>RECORD → REMEMBER</span>
+          <span className="cover-page-number">01</span>
+        </div>
+
+        <div className="turn-hint">
+          <span>keep going</span>
+          <i />
+        </div>
       </section>
 
-      <section className="intro" id="intro">
-        <div className="intro-grid">
-          <h2>Your recordings remember nothing.<em> RECALL does.</em></h2>
-          <div>
-            <p className="intro-lead">We connects moments across time to reconstruct the story behind a recording.</p>
-            <p>RECALL reconstructs those moments into a searchable memory. Ask what happened, when it happened, who was involved, why a decision changed, or what was left unresolved.</p>
-          </div>
-        </div>
-      </section>
+      {/* =====================================================
+          INTRO / FIRST NOTEBOOK PAGE
+      ===================================================== */}
 
-      <section className="memory-scroll" id="features" ref={memoryScrollRef}>
-        <div className="memory-sticky">
-          <div className="memory-layer memory-statement" ref={memoryStatementRef}>
-            <div className="section-heading">
-              <div><h2>This is memory, not a transcript.</h2></div>
-              <p>A transcript records words. RECALL follows the thread: how an idea started, where it hit friction, and what it became.</p>
+      <section className="notebook-page intro-page" id="intro">
+        <div className="page-inner">
+          <div className="page-topline">
+            <span>01 / THE PROBLEM</span>
+            <span>RECALL FIELD NOTES</span>
+          </div>
+
+          <div className="intro-content">
+            <div className="margin-note">
+              <span>NOTE</span>
+              <p>
+                A transcript tells you
+                what was said.
+              </p>
+            </div>
+
+            <div className="intro-main">
+              <p className="hand-label">
+                what gets lost
+              </p>
+
+              <h2>
+                Your recordings
+                <br />
+                remember nothing.
+                <em> RECALL does.</em>
+              </h2>
+
+              <div className="intro-rule" />
+
+              <p className="intro-lead">
+                We connect moments across time to reconstruct
+                the story behind a recording.
+              </p>
+
+              <p className="intro-body">
+                RECALL reconstructs those moments into a
+                searchable memory. Ask what happened, when it
+                happened, who was involved, why a decision
+                changed, or what was left unresolved.
+              </p>
+            </div>
+
+            <div className="page-stamp">
+              <span>RECALL</span>
+              <small>MEMORY / 001</small>
             </div>
           </div>
 
-          <div className="memory-layer memory-content" ref={memoryContentRef}>
-            <div className="feature-layout">
-              <div className="feature-list">
-                {features.map(([number, title], i) => (
-                  <button key={number} className={`feature-row ${active === i ? "active" : ""}`} onMouseEnter={() => setActive(i)}>
-                    <span>{number}</span><strong>{title}</strong><i>↗</i>
-                  </button>
-                ))}
+          {/* <div className="page-bottom">
+            <span>keep scrolling →</span>
+            <span>02</span>
+          </div> */}
+        </div>
+      </section>
+
+      {/* =====================================================
+          MEMORY / FEATURES
+      ===================================================== */}
+
+      <section className="notebook-page memory-page" id="features">
+        <div className="page-inner">
+          <div className="page-topline">
+            <span>02 / HOW IT WORKS</span>
+            <span>THE MEMORY METHOD</span>
+          </div>
+
+          <div className="memory-heading">
+            <div>
+              <p className="hand-label">
+                read between the lines
+              </p>
+
+              <h2>
+                This is memory,
+                <br />
+                <em>not a transcript.</em>
+              </h2>
+            </div>
+
+            <p>
+              A transcript records words. RECALL follows the
+              thread: how an idea started, where it hit
+              friction, and what it became.
+            </p>
+          </div>
+
+          <div className="memory-layout">
+            <div className="feature-list">
+              {features.map((feature, index) => (
+                <button
+                  key={feature.number}
+                  className={`feature-row ${
+                    active === index ? "active" : ""
+                  }`}
+                  onMouseEnter={() => setActive(index)}
+                  onFocus={() => setActive(index)}
+                >
+                  <span className="feature-number">
+                    {feature.number}
+                  </span>
+
+                  <strong>{feature.title}</strong>
+
+                  <span className="feature-arrow">
+                    ↗
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div className="memory-paper">
+              <div className="memory-paper-header">
+                <span>MEMORY / LAUNCH PLANNING</span>
+                <span>00:54:31</span>
               </div>
-              <div className="memory-preview">
-                <div className="preview-top"><span>MEMORY / LAUNCH PLANNING</span><span>00:54:31</span></div>
-                <div className="preview-visual">
-                  <div className="preview-orbit orbit-one" /><div className="preview-orbit orbit-two" />
-                  <div className="preview-center"><span />MEMORY</div>
-                  <div className="memory-node node-a"><small>00:08</small><b>Idea raised</b><span>Ship in October</span></div>
-                  <div className="memory-node node-b"><small>00:31</small><b>Pushback</b><span>QA team flags risk</span></div>
-                  <div className="memory-node node-c"><small>00:47</small><b>Resolved</b><span>Delayed to November</span></div>
+
+              <div className="memory-map">
+                <div className="scribble-path path-one" />
+                <div className="scribble-path path-two" />
+
+                <div className="memory-pin pin-one">
+                  <small>00:08</small>
+                  <strong>Idea raised</strong>
+                  <span>Ship in October</span>
                 </div>
-                <div className="preview-caption"><span>{features[active][1].toUpperCase()}</span><p>{features[active][2]}</p></div>
+
+                <div className="memory-pin pin-two">
+                  <small>00:31</small>
+                  <strong>Pushback</strong>
+                  <span>QA flags a risk</span>
+                </div>
+
+                <div className="memory-pin pin-three">
+                  <small>00:47</small>
+                  <strong>Resolved</strong>
+                  <span>Delayed to November</span>
+                </div>
+
+                <div className="memory-thread-label">
+                  <span>THE THREAD</span>
+                  <i />
+                </div>
+              </div>
+
+              <div className="memory-caption">
+                <span>
+                  {features[active].number} /{" "}
+                  {features[active].title}
+                </span>
+
+                <p>
+                  {features[active].description}
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section className="evidence-section" id="about">
-        <div className="evidence-copy">
-          <h2>No answer without a source.</h2>
-          <p>RECALL won't hand you a conclusion and ask you to trust it. Every insight is a timestamp away from the moment it came from.</p>
-        </div>
-        <div className="evidence-card">
-          <h3>Why did launch get pushed to November?</h3>
-          <p>QA raised a risk in testing that made the October date unrealistic. The team weighed the tradeoff and agreed to delay rather than ship with the issue open.</p>
-          <div className="evidence-items">
-            <div className="evidence-item"><time>00:31</time><div><b>Risk flagged</b><span>"We haven't finished regression testing on checkout..."</span></div><button>Jump ↗</button></div>
-            <div className="evidence-item"><time>00:47</time><div><b>Decision made</b><span>"Let's push to November and do this right."</span></div><button>Jump ↗</button></div>
+          <div className="margin-arrow">
+            <span>the important part</span>
+            <i>→</i>
           </div>
+
+          {/* <div className="page-bottom">
+            <span>03 / EVIDENCE</span>
+            <span>03</span>
+          </div> */}
         </div>
       </section>
 
-      <section className="closing">
-        <div className="closing-orb" />
-        <div className="section-kicker">Don't just record.</div><h2>Remember.</h2>
-        <p>Turn passive recordings into an interactive, verifiable source of knowledge that stays useful long after the moment has passed.</p>
-        <Link to="/upload" className="button button-light">Start with a memory <span>↗</span></Link>
+      {/* =====================================================
+          EVIDENCE
+      ===================================================== */}
+
+      <section className="notebook-page evidence-page" id="about">
+        <div className="page-inner">
+          <div className="page-topline">
+            <span>03 / EVIDENCE</span>
+            <span>NOTHING WITHOUT A SOURCE</span>
+          </div>
+
+          <div className="evidence-layout">
+            <div className="evidence-copy">
+              <p className="hand-label">
+                underline this
+              </p>
+
+              <h2>
+                No answer
+                <br />
+                without a
+                <em> source.</em>
+              </h2>
+
+              <div className="red-pencil-mark" />
+
+              <p>
+                RECALL won't hand you a conclusion and ask
+                you to trust it.
+              </p>
+
+              <p>
+                Every insight is a timestamp away from the
+                moment it came from.
+              </p>
+            </div>
+
+            <div className="evidence-paper">
+              <div className="evidence-question">
+                Why did launch get pushed to November?
+              </div>
+
+              <div className="evidence-answer">
+                QA raised a risk in testing that made the
+                October date unrealistic. The team weighed
+                the tradeoff and agreed to delay rather than
+                ship with the issue open.
+              </div>
+
+              <div className="evidence-items">
+                <div className="evidence-item">
+                  <time>00:31</time>
+
+                  <div>
+                    <strong>Risk flagged</strong>
+                    <span>
+                      "We haven't finished regression
+                      testing on checkout..."
+                    </span>
+                  </div>
+
+                  <button>Jump ↗</button>
+                </div>
+
+                <div className="evidence-item">
+                  <time>00:47</time>
+
+                  <div>
+                    <strong>Decision made</strong>
+                    <span>
+                      "Let's push to November and do this
+                      right."
+                    </span>
+                  </div>
+
+                  <button>Jump ↗</button>
+                </div>
+              </div>
+
+              <div className="evidence-pencil">
+                verified against recording
+              </div>
+            </div>
+          </div>
+
+          <div className="paper-plane plane-two" aria-hidden="true">
+            <span className="plane-body" />
+            <span className="plane-trail" />
+          </div>
+
+          {/* <div className="page-bottom">
+            <span>04 / YOUR MEMORY</span>
+            <span>04</span>
+          </div> */}
+        </div>
       </section>
 
-      <footer>
-        <Link to="/" className="footer-brand"><img src="/recall-logo.svg" alt="" /><span>RECALL</span></Link>
-        <span>© 2026 RECALL</span><span>Memory, reconstructed.</span>
+      {/* =====================================================
+          CLOSING
+      ===================================================== */}
+
+      <section className="notebook-page closing-page">
+        <div className="closing-paper">
+          <div className="closing-margin" />
+
+          <h2>
+            Don't just
+            <br />
+            record.
+            <br />
+            <em>Remember.</em>
+          </h2>
+
+          <p className="closing-copy">
+            Give the moments you care about somewhere
+            better to live.
+          </p>
+
+          <Link to="/upload" className="paper-button paper-button-dark">
+            Start with a memory
+            <span>↗</span>
+          </Link>
+
+          <div className="closing-doodle">
+            <span />
+            <span />
+            <span />
+          </div>
+
+          <div className="closing-signature">
+            — RECALL
+          </div>
+
+          {/* <div className="closing-page-number">
+            05
+          </div> */}
+        </div>
+      </section>
+
+      <footer className="notebook-footer">
+        <Link to="/" className="footer-mark">
+          <img src="/recall-logo.svg" alt="" />
+          <span>RECALL</span>
+        </Link>
+
+        <span>© 2026 RECALL</span>
+
+        <span>Memory, reconstructed.</span>
       </footer>
     </div>
   );

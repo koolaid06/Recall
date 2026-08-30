@@ -1,74 +1,64 @@
 import { useEffect, useState } from "react";
+import VideoPlayer from "./VideoPlayer";
 
 export default function MemoryVideo({
-  file,
-  activeSeconds = 0,
-  onTimeChange,
+file,
+activeSeconds = 0,
+onTimeChange,
 }) {
-  const [videoUrl, setVideoUrl] = useState(null);
+const [videoUrl, setVideoUrl] = useState(null);
 
-  useEffect(() => {
-    if (!file) {
-      setVideoUrl(null);
-      return;
-    }
+useEffect(() => {
+if (!file) {
+setVideoUrl(null);
+return;
+}
 
-    const url = URL.createObjectURL(file);
+const url = URL.createObjectURL(file);
 
-    setVideoUrl(url);
+setVideoUrl(url);
 
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [file]);
+return () => {
+  URL.revokeObjectURL(url);
+};
 
-  if (!file || !videoUrl) {
-    return (
-      <section className="memory-video-section">
-        <div className="memory-video-empty">
-          <span>RECORDING</span>
-          <p>Original recording is unavailable.</p>
-        </div>
-      </section>
-    );
-  }
 
-  return (
-    <section className="memory-video-section">
-      <div className="memory-video-header">
-        <div>
-          <span className="panel-label">
-            ORIGINAL RECORDING
-          </span>
+}, [file]);
 
-          <h2>{file.name}</h2>
-        </div>
+if (!file || !videoUrl) {
+return ( <section className="memory-video-section"> <div className="memory-video-empty"> <span>RECORDING / UNAVAILABLE</span>
 
-        <span className="memory-video-meta">
-          {(file.size / 1024 / 1024).toFixed(1)} MB
-        </span>
-      </div>
+```
+      <h3>
+        The original isn't here.
+      </h3>
 
-      <div className="memory-video-frame">
-        <video
-          src={videoUrl}
-          controls
-          onTimeUpdate={(e) =>
-            onTimeChange?.(
-              e.currentTarget.currentTime
-            )
-          }
-          onLoadedMetadata={(e) => {
-            if (
-              activeSeconds > 0 &&
-              activeSeconds < e.currentTarget.duration
-            ) {
-              e.currentTarget.currentTime =
-                activeSeconds;
-            }
-          }}
-        />
-      </div>
-    </section>
-  );
+      <p>
+        This memory can still be explored, but the
+        original recording is no longer available in
+        this browser session.
+      </p>
+    </div>
+  </section>
+);
+
+}
+
+return ( <section className="memory-video-section"> <div className="memory-video-meta-row"> <span>{file.name}</span>
+
+    <span>
+      {(file.size / 1024 / 1024).toFixed(1)} MB
+    </span>
+  </div>
+
+  <div className="memory-video-frame">
+    <VideoPlayer
+      src={videoUrl}
+      activeSeconds={activeSeconds}
+      onTimeChange={onTimeChange}
+    />
+  </div>
+</section>
+
+);
 }

@@ -1,72 +1,179 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const stages = [
-  "Reading recording",
-  "Transcribing conversation",
-  "Extracting events",
-  "Connecting decisions",
-  "Building memory graph",
+{
+id: "preprocessing",
+label: "Reading recording",
+},
+{
+id: "transcribing",
+label: "Transcribing conversation",
+},
+{
+id: "extracting_events",
+label: "Extracting important moments",
+},
+{
+id: "connecting_decisions",
+label: "Connecting decisions",
+},
+{
+id: "building_memory",
+label: "Building memory",
+},
 ];
 
-export default function ProcessingState() {
-  const [stage, setStage] = useState(0);
+function getStageIndex(stage) {
+const normalized = String(stage || "")
+.toLowerCase()
+.replace(/[\s-]+/g, "_");
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStage((current) => {
-        if (current >= stages.length - 1) return current;
-        return current + 1;
-      });
-    }, 1800);
+const index = stages.findIndex(
+(item) => item.id === normalized
+);
 
-    return () => clearInterval(interval);
-  }, []);
+if (index !== -1) {
+return index;
+}
 
-  const progress = ((stage + 1) / stages.length) * 100;
+const aliases = {
+reading: 0,
+preprocessing: 0,
 
-  return (
-    <div className="processing-card">
-      <div className="processing-orb" />
 
-      <div className="product-kicker">RECALL ENGINE</div>
+transcription: 1,
+transcribing: 1,
 
-      <h2>Building your memory.</h2>
+events: 2,
+extracting: 2,
+extracting_events: 2,
 
-      <p>
-        RECALL is reconstructing the recording into events, decisions and
-        evidence.
+decisions: 3,
+connecting: 3,
+connecting_decisions: 3,
+
+memory: 4,
+building: 4,
+building_memory: 4,
+
+
+};
+
+return aliases[normalized] ?? 0;
+}
+
+export default function ProcessingState({
+stage = "preprocessing",
+}) {
+const currentStage = useMemo(
+() => getStageIndex(stage),
+[stage]
+);
+
+const [displayStage, setDisplayStage] =
+useState(currentStage);
+
+useEffect(() => {
+setDisplayStage(currentStage);
+}, [currentStage]);
+
+const progress =
+((displayStage + 1) / stages.length) * 100;
+
+return ( <section className="processing-card"> <div className="processing-topline"> <span>RECALL ENGINE</span>
+
+
+    <span>
+      {Math.round(progress)}% COMPLETE
+    </span>
+  </div>
+
+  <div className="processing-header">
+    <div className="processing-signal">
+      <span />
+      <span />
+      <span />
+    </div>
+
+    <div>
+      <p className="processing-hand">
+        one moment...
       </p>
 
-      <div className="processing-progress">
-        <span style={{ width: `${progress}%` }} />
-      </div>
-
-      <div className="processing-stages">
-        {stages.map((name, i) => {
-          const done = i < stage;
-          const current = i === stage;
-
-          return (
-            <div
-              className={`processing-stage ${
-                done ? "done" : ""
-              } ${current ? "current" : ""}`}
-              key={name}
-            >
-              <span className="stage-indicator">
-                {done ? "✓" : current ? "•" : "○"}
-              </span>
-
-              <span>{name}</span>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="processing-current">
-        <span className="processing-pulse" />
-        {stages[stage]}
-      </div>
+      <h2>
+        Building your memory.
+      </h2>
     </div>
-  );
+  </div>
+
+  <p className="processing-description">
+    RECALL is tracing the recording,
+    identifying important moments, and
+    connecting them into something you can
+    return to.
+  </p>
+
+  <div className="processing-progress">
+    <span
+      style={{
+        width: `${progress}%`,
+      }}
+    />
+  </div>
+
+  <div className="processing-stages">
+    {stages.map((item, index) => {
+      const done =
+        index < displayStage;
+
+      const current =
+        index === displayStage;
+
+      return (
+        <div
+          className={`processing-stage ${
+            done
+              ? "done"
+              : ""
+          } ${
+            current
+              ? "current"
+              : ""
+          }`}
+          key={item.id}
+        >
+          <span className="stage-number">
+            {String(index + 1).padStart(
+              2,
+              "0"
+            )}
+          </span>
+
+          <span className="stage-name">
+            {item.label}
+          </span>
+
+          <span className="stage-status">
+            {done
+              ? "DONE"
+              : current
+                ? "WORKING"
+                : "WAITING"}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+
+  <div className="processing-current">
+    <span className="processing-pulse" />
+
+    <span>
+      {stages[displayStage].label}
+    </span>
+  </div>
+</section>
+
+
+);
 }

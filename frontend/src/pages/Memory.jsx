@@ -15,12 +15,7 @@ import { useMemory } from "../context/MemoryContext";
 export default function Memory() {
   const { id } = useParams();
 
-  const {
-    file,
-    setFile,
-    recordingId,
-    setRecordingId,
-  } = useMemory();
+  const { file } = useMemory();
 
   const [data, setData] = useState(null);
   const [activeSeconds, setActiveSeconds] = useState(0);
@@ -111,208 +106,364 @@ export default function Memory() {
         <Navbar product />
 
         <main className="memory-main">
-          <div className="memory-loading">
-            <span>RECALL ENGINE</span>
+          <div className="memory-state">
+            <span className="memory-state-label">RECALL ENGINE / 01</span>
+            <h1>
+              Reconstructing
+              <br />
+              <em>memory.</em>
+            </h1>
+            <p>Loading the recording, events and evidence.</p>
 
-            <h2>
-              Reconstructing memory.
-            </h2>
-
-            <p>
-              Loading the recording,
-              events and evidence.
-            </p>
+            <div className="state-line">
+              <i />
+            </div>
           </div>
         </main>
       </div>
     );
-  }
+    }
 
-  if (error) {
+    if (error) {
     return (
       <div className="product-page memory-page">
         <Navbar product />
 
         <main className="memory-main">
-          <div className="memory-error">
-            <span>RECALL ENGINE</span>
-
-            <h2>
-              Memory unavailable.
-            </h2>
-
+          <div className="memory-state memory-state-error">
+            <span className="memory-state-label">RECALL ENGINE / ERROR</span>
+            <h1>
+              Memory
+              <br />
+              <em>unavailable.</em>
+            </h1>
             <p>{error}</p>
           </div>
         </main>
       </div>
     );
-  }
+    }
 
-  const recording = data.recording;
-  const rawMemory = data.memory || {};
-  const transcripts =
-    data.transcripts || [];
+    const recording = data.recording;
+    const rawMemory = data.memory || {};
+    const transcripts = data.transcripts || [];
 
-  const memory = normalizeMemory(
+    const memory = normalizeMemory(
     recording,
     rawMemory,
     transcripts
-  );
+    );
 
-  return (
+    return (
     <div className="product-page memory-page">
       <Navbar product />
 
       <main className="memory-main">
 
-        <MemoryHeader
-          memory={memory}
-        />
+        {/* =====================================================
+            MEMORY HEADER
+        ===================================================== */}
 
-        {/* RECORDING */}
-        <section className="memory-video-section">
+        <header className="memory-hero">
+          <div className="memory-hero-top">
+            <span>FIELD NOTES / MEMORY {memory.id}</span>
+            <span>RECONSTRUCTED</span>
+          </div>
 
-          <div className="memory-section-heading">
+          <div className="memory-hero-body">
             <div>
-              <span>RECORDING</span>
+              <p className="memory-kicker">
+                what happened here
+              </p>
 
-              <h2>
-                Original conversation
-              </h2>
-            </div>
+              <h2>{memory.title}</h2>
 
-            <span className="memory-video-duration">
-              {memory.duration}
-            </span>
-          </div>
-
-          <div className="memory-video-container">
-
-            {videoUrl ? (
-              <VideoPlayer
-                src={videoUrl}
-                activeSeconds={
-                  activeSeconds
-                }
-                onTimeChange={
-                  setActiveSeconds
-                }
-              />
-            ) : (
-              <div className="memory-video-unavailable">
-                <span>
-                  RECORDING
-                </span>
-
-                <h3>
-                  Recording unavailable
-                </h3>
-
-                <p>
-                  The original recording
-                  is no longer available
-                  in this browser session.
-                </p>
-              </div>
-            )}
-
-          </div>
-
-        </section>
-
-        {/* TIMELINE + ASK */}
-        <div className="memory-workspace">
-
-          <div className="media-column">
-
-            <Timeline
-              events={memory.events}
-              activeSeconds={
-                activeSeconds
-              }
-              onSelect={
-                selectTimeline
-              }
-            />
-
-          </div>
-
-          <AskMemory
-            memoryId={id}
-            onEvidenceClick={
-              selectEvidence
-            }
-          />
-
-        </div>
-
-        {/* SELECTED EVENT */}
-        {selectedEvent && (
-          <div className="selected-memory">
-
-            <span>
-              {selectedEvent.time ||
-                formatTime(
-                  selectedEvent.seconds
-                )}
-            </span>
-
-            <div>
-              <b>
-                {selectedEvent.title}
-              </b>
-
-              <p>
-                {selectedEvent.detail ||
-                  selectedEvent.quote ||
-                  ""}
+              <p className="memory-intro">
+                A reconstructed view of the conversation —
+                its moments, decisions, and what was left open.
               </p>
             </div>
 
-            <button
-              onClick={() =>
-                setSelectedEvent(null)
-              }
-              aria-label="Close"
-            >
-              ×
-            </button>
+            <div className="memory-facts">
+              <div>
+                <span>DATE</span>
+                <strong>{memory.date}</strong>
+              </div>
+
+              <div>
+                <span>DURATION</span>
+                <strong>{memory.duration}</strong>
+              </div>
+
+              <div>
+                <span>PEOPLE</span>
+                <strong>{memory.participants}</strong>
+              </div>
+            </div>
+          </div>
+{/* 
+          <div className="memory-hero-bottom">
+            <span>01 / RECORDING</span>
+            <span>THE ORIGINAL</span>
+          </div> */}
+        </header>
+
+
+        {/* =====================================================
+            RECORDING
+        ===================================================== */}
+
+        <section className="memory-recording">
+          {/* <div className="section-label">
+            <span>01</span>
+            <div />
+            <span>ORIGINAL CONVERSATION</span>
+          </div> */}
+
+          <div className="recording-heading">
+            <h2>
+              Start with
+              <br />
+              <em>what was said.</em>
+            </h2>
+
+            <span>{memory.duration}</span>
+          </div>
+
+          <div className="recording-frame">
+            {videoUrl ? (
+              <VideoPlayer
+                src={videoUrl}
+                activeSeconds={activeSeconds}
+                onTimeChange={setActiveSeconds}
+              />
+            ) : (
+              <div className="recording-empty">
+                <span>RECORDING / 00</span>
+
+                <h3>
+                  Recording unavailable.
+                </h3>
+
+                <p>
+                  The original recording is no longer
+                  available in this browser session.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+
+
+        {/* =====================================================
+            THREAD
+        ===================================================== */}
+
+        <section className="memory-thread">
+{/* 
+          <div className="section-label">
+            <span>02</span>
+            <div />
+            <span>THE THREAD</span>
+          </div> */}
+
+          <div className="thread-heading">
+            <div>
+              <p className="memory-kicker">
+                follow the conversation
+              </p>
+              <br></br>
+              <h2>
+                Where the
+                <br />
+                <em>story moved.</em>
+              </h2>
+            </div>
+
+            <p>
+              Jump between the moments that changed the
+              direction of the conversation.
+            </p>
+          </div>
+
+          <div className="thread-layout">
+
+            <div className="timeline-panel">
+              {/* <div className="panel-heading">
+                <span>TIMELINE</span>
+                <span>
+                  {memory.events.length} MOMENTS
+                </span>
+              </div> */}
+
+              <Timeline
+                events={memory.events}
+                activeSeconds={activeSeconds}
+                onSelect={selectTimeline}
+              />
+            </div>
+
+
+            <div className="ask-panel">
+              {/* <div className="panel-heading">
+                <span>ASK RECALL</span>
+                <span>TRACE AN ANSWER</span>
+              </div> */}
+
+              <div className="ask-panel-inner">
+                <p className="ask-hand">
+                  ask what you remember
+                </p>
+
+                <AskMemory
+                  memoryId={id}
+                  onEvidenceClick={selectEvidence}
+                />
+              </div>
+            </div>
 
           </div>
+        </section>
+
+
+        {/* =====================================================
+            SELECTED MOMENT
+        ===================================================== */}
+
+        {selectedEvent && (
+          <section className="memory-evidence">
+            <div className="section-label">
+              <span>03</span>
+              <div />
+              <span>SELECTED EVIDENCE</span>
+            </div>
+
+            <div className="evidence-strip">
+
+              <div className="evidence-time">
+                <span>TIME</span>
+                <strong>
+                  {selectedEvent.time ||
+                    formatTime(selectedEvent.seconds)}
+                </strong>
+              </div>
+
+              <div className="evidence-content">
+                <p className="memory-kicker">
+                  moment in the recording
+                </p>
+
+                <br></br>
+
+                <h3>{selectedEvent.title}</h3>
+
+                <p>
+                  {selectedEvent.detail ||
+                    selectedEvent.quote ||
+                    "No additional detail available."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="evidence-close"
+                onClick={() => setSelectedEvent(null)}
+                aria-label="Close selected evidence"
+              >
+                ×
+              </button>
+
+            </div>
+          </section>
         )}
 
-        {/* MEMORY BREAKDOWN */}
-        <div className="memory-lower">
 
-          <EventList
-            title="EVENTS"
-            items={memory.events.slice(
-              0,
-              4
-            )}
-          />
+        {/* =====================================================
+            WHAT WE FOUND
+        ===================================================== */}
 
-          <EventList
-            title="DECISIONS"
-            items={
-              memory.decisions
-            }
-            variant="decisions"
-          />
+        <section className="memory-findings">
+{/* 
+          <div className="section-label">
+            <span>04</span>
+            <div />
+            <span>WHAT WE FOUND</span>
+          </div> */}
 
-          <EventList
-            title="UNRESOLVED"
-            items={
-              memory.unresolved
-            }
-            variant="unresolved"
-          />
+          <div className="findings-heading">
+            <h2>
+              The parts worth
+              <br />
+              <em>keeping.</em>
+            </h2>
 
-        </div>
+            <p>
+              RECALL separates the conversation into the
+              things that happened, the choices that were
+              made, and the things nobody resolved.
+            </p>
+          </div>
+
+          <div className="findings-grid">
+
+            <section className="finding-column">
+              <div className="finding-header">
+                <span>01</span>
+                <h3>Events</h3>
+              </div>
+
+              <EventList
+                title=""
+                items={memory.events.slice(0, 4)}
+              />
+            </section>
+
+
+            <section className="finding-column finding-column-marked">
+              <div className="finding-header">
+                <span>02</span>
+                <h3>Decisions</h3>
+              </div>
+
+              <EventList
+                title=""
+                items={memory.decisions}
+                variant="decisions"
+              />
+            </section>
+
+
+            <section className="finding-column">
+              <div className="finding-header">
+                <span>03</span>
+                <h3>Unresolved</h3>
+              </div>
+
+              <EventList
+                title=""
+                items={memory.unresolved}
+                variant="unresolved"
+              />
+            </section>
+
+          </div>
+        </section>
+
+
+        {/* =====================================================
+            FOOTER NOTE
+        ===================================================== */}
+
+        <footer className="memory-footer-note">
+          <div>
+            <span>RECALL / MEMORY {memory.id}</span>
+            <span>END OF RECONSTRUCTION</span>
+          </div>
+        </footer>
 
       </main>
     </div>
-  );
+    );
 }
 
 

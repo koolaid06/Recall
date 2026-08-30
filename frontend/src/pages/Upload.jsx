@@ -93,43 +93,115 @@ export default function Upload() {
       <Navbar product />
 
       <main className="upload-main">
+
         {!processing ? (
           <>
-            <div className="upload-intro">
-              <h1>
-                Turn a recording
-                <br />
-                <em>into memory.</em>
-              </h1>
+            <header className="upload-hero">
 
-              <p>
-                Give RECALL a conversation, meeting or recording. We'll
-                reconstruct the moments that matter.
-              </p>
-            </div>
+              {/* <div className="upload-topline">
+                <span>FIELD NOTES / NEW MEMORY</span>
+                <span>RECORD → REMEMBER</span>
+              </div> */}
+
+              <div className="upload-heading">
+                <p className="upload-kicker">
+                  start somewhere
+                </p>
+                <br></br>
+                <h1>
+                  Give RECALL
+                  <br />
+                  <em>something to remember.</em>
+                </h1>
+
+                <p>
+                  Drop in a conversation, meeting or recording.
+                  RECALL will reconstruct the moments that matter.
+                </p>
+              </div>
+
+            </header>
+
 
             {errorMsg && (
-              <div style={{ color: "#ef4444", marginBottom: "1rem", fontWeight: 500 }}>
-                {errorMsg}
+              <div className="upload-error" role="alert">
+                <span>ERROR</span>
+                <p>{errorMsg}</p>
               </div>
             )}
 
-            <DropZone file={file} onFile={setFile} />
 
-            <div className="upload-bottom">
-              <button
-                className={`button upload-button ${file ? "ready" : ""}`}
-                disabled={!file}
-                onClick={start}
-              >
-                Build memory
-                <span>↗</span>
-              </button>
-            </div>
+            <section className="upload-workspace">
+{/* 
+              <div className="upload-section-label">
+                <span>01</span>
+                <div />
+                <span>ORIGINAL RECORDING</span>
+              </div> */}
+
+              <DropZone
+                file={file}
+                onFile={setFile}
+              />
+
+              <div className="upload-actions">
+
+                <div className="upload-note">
+                  <span>NOTE</span>
+                  <p>
+                    Your recording stays available in this
+                    session while RECALL builds the memory.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className={`upload-button ${
+                    file ? "ready" : ""
+                  }`}
+                  disabled={!file}
+                  onClick={start}
+                >
+                  <span>
+                    {file
+                      ? "Build memory"
+                      : "Choose a recording"}
+                  </span>
+
+                  <strong>↗</strong>
+                </button>
+
+              </div>
+
+            </section>
+
+            <footer className="upload-footer">
+              <span>RECALL / NEW MEMORY</span>
+            </footer>
           </>
         ) : (
-          <ProcessingState stage={stage} />
+          <section className="processing-page">
+            <div className="processing-content">
+              <p className="upload-kicker">
+                stay with it
+              </p>
+              <br></br>
+              <h1>
+                Reconstructing
+                <br />
+                <em>your memory.</em>
+              </h1>
+
+              <p>
+                RECALL is working through the recording,
+                finding the moments, decisions and open threads.
+              </p>
+
+              <ProcessingState stage={stage} />
+            </div>
+          </section>
         )}
+
       </main>
     </div>
   );
